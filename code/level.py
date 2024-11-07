@@ -21,9 +21,8 @@ class Level:
 
 	def create_map(self):
 		layouts = {
-			'boundary': import_csv_layout('./map/map_FloorBlocks.csv'),
-			'grass': import_csv_layout('./map/map_Grass.csv'),
-			'object': import_csv_layout('./map/map_Objects.csv'),
+			'boundary': import_csv_layout('./map/map1_border.csv'),
+			'object': import_csv_layout('./map/map1_main.csv'),
 		}
 		textures = {
 			'grass': import_folder('./textures/Grass'),
@@ -42,11 +41,11 @@ class Level:
 							random_grass_image = choice(textures['grass'])
 							Tile((x,y),[self.visible_sprites,self.obstacle_sprites],'grass',random_grass_image)
 
-						if style == 'object':
-							surf = textures['objects'][int(col)]
-							Tile((x,y),[self.visible_sprites,self.obstacle_sprites],'object',surf)
+						#if style == 'object':
+						#	surf = textures['objects'][int(col)]
+						#	Tile((x,y),[self.visible_sprites,self.obstacle_sprites],'object',surf)
 
-		self.player = Player((2000,1430),[self.visible_sprites],self.obstacle_sprites)
+		self.player = Player((1000,500),[self.visible_sprites],self.obstacle_sprites)
 	def run(self):
 		# update and draw the game
 		self.visible_sprites.custom_draw(self.player)
