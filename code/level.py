@@ -69,8 +69,9 @@ class YSortCameraGroup(pygame.sprite.Group):
 	def custom_draw(self,player):
 
 		# getting the offset 
-		self.offset.x = player.rect.centerx - self.half_width
-		self.offset.y = player.rect.centery - self.half_height
+		self.offset.x = player.rect.centerx - self.half_width + player.acceleration.x
+		self.offset.y = player.rect.centery - self.half_height + player.acceleration.y
+		self.offset.normalize()
 
 		# drawing the floor
 		floor_offset_pos = self.floor_rect.topleft - self.offset
