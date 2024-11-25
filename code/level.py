@@ -22,11 +22,12 @@ class Level:
 	def create_map(self):
 		layouts = {
 			'boundary': import_csv_layout('./map/map1_border.csv'),
-			'object': import_csv_layout('./map/map1_main.csv'),
+			'grass': import_csv_layout('./map/map1_grass.csv'),
+			#'object': import_csv_layout('./map/map1_main.csv'),
 		}
 		textures = {
 			'grass': import_folder('./textures/Grass'),
-			'objects': import_folder('./textures/objects')
+			#'objects': import_folder('./textures/objects')
 		}
 
 		for style,layout in layouts.items():
@@ -37,21 +38,17 @@ class Level:
 						y = row_index * TILESIZE
 						if style == 'boundary':
 							Tile((x,y),[self.obstacle_sprites],'invisible')
-						if style == 'grass':
-							random_grass_image = choice(textures['grass'])
-							Tile((x,y),[self.visible_sprites,self.obstacle_sprites],'grass',random_grass_image)
 
-						#if style == 'object':
-						#	surf = textures['objects'][int(col)]
-						#	Tile((x,y),[self.visible_sprites,self.obstacle_sprites],'object',surf)
+						if style == 'grass':
+							grass_img = textures['grass'][int(col)-64]
+							Tile((x,y),[self.visible_sprites,self.obstacle_sprites],'grass',grass_img)
 
 		self.player = Player((1000,500),[self.visible_sprites],self.obstacle_sprites)
+
 	def run(self):
 		# update and draw the game
 		self.visible_sprites.custom_draw(self.player)
 		self.visible_sprites.update()
-
-
 class YSortCameraGroup(pygame.sprite.Group):
 	def __init__(self):
 
