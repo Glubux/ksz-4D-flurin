@@ -26,7 +26,7 @@ class Level:
 			#'object': import_csv_layout('./map/map1_main.csv'),
 		}
 		textures = {
-			'grass': import_folder('./textures/Grass'),
+			'grass': import_folder('./textures/grass'),
 			#'objects': import_folder('./textures/objects')
 		}
 
@@ -49,6 +49,7 @@ class Level:
 		# update and draw the game
 		self.visible_sprites.custom_draw(self.player)
 		self.visible_sprites.update()
+
 class YSortCameraGroup(pygame.sprite.Group):
 	def __init__(self):
 
