@@ -1,6 +1,7 @@
 import pygame 
 from settings import *
 from debug import *
+from inventar import *
 
 class Player(pygame.sprite.Sprite):
 	def __init__(self,pos,groups,obstacle_sprites):
@@ -18,6 +19,8 @@ class Player(pygame.sprite.Sprite):
 		self.obstacle_sprites = obstacle_sprites
 
 		self.acceleration = pygame.math.Vector2()
+
+		self.inventar = Inventar()
 
 	def input(self):
 		keys = pygame.key.get_pressed()
@@ -99,4 +102,5 @@ class Player(pygame.sprite.Sprite):
 
 	def update(self):
 		self.input()
+		self.inventar.update()
 		self.move(self.speed)
