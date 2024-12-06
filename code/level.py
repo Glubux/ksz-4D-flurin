@@ -4,7 +4,6 @@ from tile import Tile
 from player import Player
 from debug import debug
 from support import *
-from random import choice
 
 class Level:
 	def __init__(self):

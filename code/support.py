@@ -20,3 +20,26 @@ def import_folder(path):
 			surface_list.append(image_surf)
 
 	return surface_list
+
+
+items = {}
+
+def register_item(name="Unknow Item", description="Unknow Item", inv_img="./textures/item/Unknown_Item.png", stack_max=99, group=None, range=3, wear=-1, meta=[]):
+    if name in items:
+        raise ValueError(f"Item '{name}' ist bereits registriert!")
+    
+    items[name] = {
+        "description": description,
+        "inv_img": inv_img,
+        "stack_max": stack_max,
+        "group": group,
+        "range": range,
+        "wear": wear,
+        "meta": meta
+    }
+
+def get_item(name):
+    return items.get(name, None)
+
+def get_item_list():
+    return list(items.keys())
