@@ -24,7 +24,7 @@ def import_folder(path):
 
 items = {}
 
-def register_item(name="Unknow Item", description="Unknow Item", inv_img="./textures/item/Unknown_Item.png", stack_max=99, group=None, range=3, wear=-1, meta=[]):
+def register_item(name="Unknow Item", description="Unknow Item", inv_img="../textures/item/Unknown_Item.png", stack_max=99, group=None, range=3, wear=-1, meta=[]):
     if name in items:
         raise ValueError(f"Item '{name}' ist bereits registriert!")
     
