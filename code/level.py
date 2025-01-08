@@ -1,9 +1,10 @@
-import pygame 
+import pygame, sys
 from settings import *
 from tile import Tile
 from player import Player
 from debug import debug
 from support import *
+from inventar import *
 
 class Level:
 	def __init__(self):
@@ -17,6 +18,19 @@ class Level:
 
 		# sprite setup
 		self.create_map()
+
+		self.inv_status = False
+		self.menu_status = False
+
+		self.hotbar = Hotbar()
+		self.menu = Menu()
+		self.inv = Inventar()
+
+		self.menu_data = None
+		self.inv_data = None
+
+		self.inv_update_ans = None
+
 
 	def create_map(self):
 		layouts = {
@@ -44,10 +58,66 @@ class Level:
 
 		self.player = Player((1000,500),[self.visible_sprites],self.obstacle_sprites)
 
+
+	def input(self):
+		keys = pygame.key.get_pressed()
+
+		if keys[pygame.K_e]:
+			if cooldown("open_inv", 0.5):
+				if not self.inv_status:
+					if self.menu_status:
+						pass
+					else:
+						self.inv_status = True
+						self.inv.open_inv()
+
+				else:
+					self.inv.close_inv()
+					pass
+
+		if keys[pygame.K_ESCAPE]:
+			if cooldown("open_menu", 0.5):
+				if not self.menu_status:
+					if self.inv_status:
+						self.inv.close_inv()
+					else:
+						self.menu_status = True
+						self.menu.open_menu()
+				
+				else:
+					self.menu.close_menu()
+					self.menu_status = False
+		
 	def run(self):
 		# update and draw the game
 		self.visible_sprites.custom_draw(self.player)
-		self.visible_sprites.update()
+		self.input()
+		if self.menu_status:
+			self.menu_data = self.menu.update()
+
+			if self.menu_data == "1":
+				self.menu.close_menu()
+				self.menu_status = False
+			if self.menu_data == "2":
+				print("Einstellungen")
+			if self.menu_data == "3":
+				print("Speichern & Laden")
+			if self.menu_data == "4":
+				pygame.quit()
+				sys.exit()
+			
+		elif self.inv_status:
+			self.inv_update_ans = self.inv.update()
+			print(self.inv_update_ans)
+			if self.inv_update_ans["status"] == "closed":
+				self.inv_status = False
+				self.inv.status = ""
+			
+
+		else:
+			self.visible_sprites.update()
+			self.hotbar.update()
+
 
 class YSortCameraGroup(pygame.sprite.Group):
 	def __init__(self):

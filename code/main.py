@@ -1,7 +1,7 @@
 import pygame, sys
 from settings import *
 from level import Level
-
+4
 class Game:
 	def __init__(self):
 
@@ -31,7 +31,7 @@ class Game:
 	def key_handler(self):
 		keys = pygame.key.get_pressed()
 
-		if keys[pygame.K_ESCAPE]:
+		if keys[pygame.K_DELETE]:
 			self.game_running = False
 
 if __name__ == '__main__':

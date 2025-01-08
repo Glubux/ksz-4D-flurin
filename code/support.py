@@ -18,9 +18,27 @@ def import_folder(path):
 			full_path = path + '/' + image
 			image_surf = pygame.image.load(full_path).convert_alpha()
 			surface_list.append(image_surf)
-
+	print(surface_list)
 	return surface_list
 
+def import_image(path):
+    if type(path) == list:
+        return [pygame.image.load(p).convert_alpha() for p in path]
+    else:
+        return pygame.image.load(path).convert_alpha()
+
+cooldowns = {}
+def cooldown(name, duration=1):
+    current_time = pygame.time.get_ticks() / 1000
+
+    if name in cooldowns:
+        if current_time - cooldowns[name] >= duration:
+            cooldowns[name] = current_time
+            return True
+        return False
+    else:
+        cooldowns[name] = current_time
+        return True
 
 items = {}
 

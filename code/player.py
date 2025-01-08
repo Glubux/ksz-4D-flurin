@@ -1,14 +1,13 @@
 import pygame 
 from settings import *
 from debug import *
-from inventar import *
 
 class Player(pygame.sprite.Sprite):
 	def __init__(self,pos,groups,obstacle_sprites):
 		super().__init__(groups)
 		self.image = pygame.image.load('../textures/test/player.png').convert_alpha()
 		self.rect = self.image.get_rect(topleft = pos)
-		self.hitbox = self.rect.inflate(0,-26)
+		self.hitbox = self.rect.inflate(-10,-26)
 
 		self.direction = pygame.math.Vector2()
 
@@ -20,7 +19,6 @@ class Player(pygame.sprite.Sprite):
 
 		self.acceleration = pygame.math.Vector2()
 
-		self.inventar = Inventar()
 
 	def input(self):
 		keys = pygame.key.get_pressed()
@@ -102,5 +100,4 @@ class Player(pygame.sprite.Sprite):
 
 	def update(self):
 		self.input()
-		self.inventar.update()
 		self.move(self.speed)
