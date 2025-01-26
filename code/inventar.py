@@ -64,11 +64,12 @@ class Menu(pygame.sprite.Sprite):
 	def __init__(self):
 		super().__init__()
 		self.screen = pygame.display.get_surface()
+		self.font = pygame.font.SysFont("mongolianbaiti", 30)
+
 
 		self.status = False
 
 		self.images = self.load_images()
-		self.font = pygame.font.SysFont("mongolianbaiti", 30)
 
 		self.draw_frame = 0
 
@@ -97,6 +98,7 @@ class Menu(pygame.sprite.Sprite):
 
 	def open_menu(self):
 		self.status = True
+		self.draw_frame = 0
 		print("Menu öffnen")
 
 	def close_menu(self):
@@ -254,6 +256,8 @@ class Inventar(pygame.sprite.Sprite):
 		pos = (300,0)
 		scale = 1.5
 
+		self.screen.blit(self.textures["inv_background"], (0,0))
+
 		for i in range(len(self.textures["inv_close"])):
 			surface = self.textures["inv_close"][self.inv_close_frame]
 			size = surface.get_size()
@@ -293,4 +297,12 @@ class Inventar(pygame.sprite.Sprite):
 			self.input_ans = self.input()
 			self.draw()
 
-		return {"input_ans": self.input_ans, "status": self.status}	
+		return {"input_ans": self.input_ans, "status": self.status}
+	
+
+class Inventory_Image(pygame.sprite.Sprite):
+	def __init__(self, pos, groups, type = "visible", surface = pygame.Surface((TILESIZE,TILESIZE))):
+		super().__init__()
+
+		self.image = None
+		self.rect = self.image.get_rect()

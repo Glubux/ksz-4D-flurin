@@ -5,7 +5,7 @@ from debug import *
 class Player(pygame.sprite.Sprite):
 	def __init__(self,pos,groups,obstacle_sprites):
 		super().__init__(groups)
-		self.image = pygame.image.load('../textures/test/player.png').convert_alpha()
+		self.image = pygame.image.load('../textures/skins/player.png').convert_alpha()
 		self.rect = self.image.get_rect(topleft = pos)
 		self.hitbox = self.rect.inflate(-10,-26)
 
@@ -98,6 +98,10 @@ class Player(pygame.sprite.Sprite):
 					if self.direction.y < 0: # moving up
 						self.hitbox.top = sprite.hitbox.bottom
 
+	def draw(self):
+		pass
+
 	def update(self):
+		self.draw()
 		self.input()
 		self.move(self.speed)

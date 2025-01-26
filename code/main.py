@@ -2,7 +2,7 @@ import pygame, sys
 from settings import *
 from level import Level
 4
-class Game:
+class Game: 
 	def __init__(self):
 
 		# general setup

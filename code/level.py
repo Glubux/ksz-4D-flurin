@@ -5,6 +5,7 @@ from player import Player
 from debug import debug
 from support import *
 from inventar import *
+from npc import *
 
 class Level:
 	def __init__(self):
@@ -15,32 +16,38 @@ class Level:
 		# sprite group setup
 		self.visible_sprites = YSortCameraGroup()
 		self.obstacle_sprites = pygame.sprite.Group()
+		self.npcs = pygame.sprite.Group()
 
-		# sprite setup
-		self.create_map()
+		
 
 		self.inv_status = False
 		self.menu_status = False
+		self.dialog_status = False
 
 		self.hotbar = Hotbar()
 		self.menu = Menu()
 		self.inv = Inventar()
+		self.dialog = Dialog()
 
 		self.menu_data = None
 		self.inv_data = None
 
 		self.inv_update_ans = None
 
+		self.dialog_ans = None
+
+		# sprite setup
+		self.create_map()
+
 
 	def create_map(self):
 		layouts = {
 			'boundary': import_csv_layout('../map/map1_border.csv'),
 			'grass': import_csv_layout('../map/map1_grass.csv'),
-			#'object': import_csv_layout('./map/map1_main.csv'),
+			"npc": import_csv_layout("../textures/Tiled_work/npc.csv")
 		}
 		textures = {
 			'grass': import_folder('../textures/grass'),
-			#'objects': import_folder('./textures/objects')
 		}
 
 		for style,layout in layouts.items():
@@ -55,6 +62,11 @@ class Level:
 						if style == 'grass':
 							grass_img = textures['grass'][int(col)-64]
 							Tile((x,y),[self.visible_sprites,self.obstacle_sprites],'grass',grass_img)
+
+						if style == "npc":
+							npc = Npc((x, y), [self.visible_sprites, self.npcs], self.obstacle_sprites, "schrödinger", self.dialog)
+							self.npcs.add(npc)
+
 
 		self.player = Player((1000,500),[self.visible_sprites],self.obstacle_sprites)
 
@@ -92,6 +104,9 @@ class Level:
 		# update and draw the game
 		self.visible_sprites.custom_draw(self.player)
 		self.input()
+
+		self.dialog_ans = self.dialog.update()
+
 		if self.menu_status:
 			self.menu_data = self.menu.update()
 
@@ -112,11 +127,14 @@ class Level:
 			if self.inv_update_ans["status"] == "closed":
 				self.inv_status = False
 				self.inv.status = ""
-			
-
+		
 		else:
-			self.visible_sprites.update()
 			self.hotbar.update()
+
+			self.visible_sprites.update()
+
+			for npc in self.npcs:
+				npc.update_player_pos(self.player.rect.center)
 
 
 class YSortCameraGroup(pygame.sprite.Group):

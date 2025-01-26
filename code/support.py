@@ -21,11 +21,14 @@ def import_folder(path):
 	print(surface_list)
 	return surface_list
 
-def import_image(path):
+def import_image(path, n = ""):
     if type(path) == list:
-        return [pygame.image.load(p).convert_alpha() for p in path]
+        if len(path) == 1:
+            return pygame.image.load(path[0]).convert_alpha()
+        else:
+            return [pygame.image.load(p).convert_alpha() for p in path]
     else:
-        return pygame.image.load(path).convert_alpha()
+        return pygame.image.load(path).convert_alpha()		
 
 cooldowns = {}
 def cooldown(name, duration=1):
