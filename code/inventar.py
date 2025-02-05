@@ -44,8 +44,8 @@ class Hotbar(pygame.sprite.Sprite):
 
 		self.hotbar_seleced = self.hotbar[self.hotbar_index-1]
 
-		debug(self.hotbar, 100,10)
-		debug(self.hotbar_seleced, 120,10)
+		debug(self.hotbar, 130,10)
+		debug(self.hotbar_seleced, 150,10)
 
 class Item(pygame.sprite.Sprite):
 	def __init__(self, name = "Unknow Item", description = "Unknow Item", inv_img = "./textures/item/Unknown_Item.png", stack_max = 99, group = None, range = 3, wear = -1, meta = []):

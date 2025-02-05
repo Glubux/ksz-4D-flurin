@@ -63,11 +63,13 @@ class Level:
 							Tile((x,y),[self.visible_sprites,self.obstacle_sprites],'grass',grass_img)
 
 						if style == "npc":
-							npc = Npc((x, y), [self.visible_sprites, self.npcs], self.obstacle_sprites, "schrödinger", self.dialog)
-							self.npcs.add(npc)
+							#npc = Npc((x, y), [self.visible_sprites, self.npcs], self.obstacle_sprites, "schrödinger", self.dialog)
+							#self.npcs.add(npc)
+							pass
 
 
-		self.player = Player((1000,500),[self.visible_sprites],self.obstacle_sprites)
+		self.player = Player((1000,500),[self.visible_sprites],self.obstacle_sprites,"Alex")
+
 
 
 	def input(self):

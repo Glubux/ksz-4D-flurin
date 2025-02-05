@@ -4,77 +4,75 @@ from debug import *
 from support import *
 
 class Player(pygame.sprite.Sprite):
-	def __init__(self,pos,groups,obstacle_sprites):
+	def __init__(self,pos,groups,obstacle_sprites,skin_name):
 		super().__init__(groups)
-		self.image = pygame.image.load('../textures/skins/player.png').convert_alpha()
+		self.skin_name = skin_name
+		self.image = pygame.image.load('../textures/character and portrait/Character/Pre-made/'+self.skin_name+'/Idle.png').convert_alpha()
 		self.rect = self.image.get_rect(topleft = pos)
-		self.hitbox = self.rect.inflate(-10,-26)
+		self.hitbox = self.rect.inflate(-70,-50)
 
 		self.direction = pygame.math.Vector2()
 		self.player_direction = "down"
-		self.idl_direction = "idl_down"
-		self.skin_direction= ""
+		self.player_action = "idle"
 
-		self.normal_speed = 5
-		self.sprint_speed = 8
+
+		self.normal_speed = 4
+		self.sprint_speed = 6
 		self.speed = self.normal_speed
 		self.obstacle_sprites = obstacle_sprites
-#02556
+
 		self.acceleration = pygame.math.Vector2()
 
 
-		self.animations_surface = self.import_animation()
+		self.animations_surface = self.load_textures()
 		self.animations_frame = 0
 		self.animations_speed = 0.2
 
-		self.is_attacking = False
-		self.attack_direction = None
-
-	def import_animation(self):
-		size = (32, 32)
-		scale_faktor = 4
-		self.img = import_image('../textures/skins/player/player.png')
-		self.animation = [
-			["idl_down", [1, 5]], ["idl_right", [2, 5]], ["idl_left", [3, 5]], ["idl_up", [4, 5]], 
-			["walk_down", [5, 5]], ["walk_right", [6, 5]], ["walk_left", [7, 5]], ["walk_up", [8, 5]],
-			["atk_down", [9, 4]], ["atk_up", [10, 4]], ["atk_left", [11, 4]], ["atk_right", [12, 4]]
-		]
-
-		animations = {}
-
-		for animation in self.animation:
-			animation_name, (row, frame_count) = animation
-			frames = []
-
-			for frame in range(frame_count):
-				x = frame * size[0]
-				y = (row - 1) * size[1]
-				frame_surface = self.img.subsurface((x, y, size[0], size[1]))
-				frame_surface = pygame.transform.scale(frame_surface, (size[0]*scale_faktor, size[1]*scale_faktor))
-				if animation_name[-4:] == "left":
-					frame_surface = pygame.transform.flip(frame_surface, True, False)
-
-				frames.append(frame_surface)
-
-			animations[animation_name] = frames
-
-		return animations
+		self.is_attacking = False 
+		self.attacking_frame = 0
 
 
+	def load_textures(self):
+		textures = {
+			"walk": import_animation("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Walk.png", [6,4]),
+			"run": import_animation("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Run.png", [8,4]),
+			"idl": import_animation("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Idle.png", [4,4]),
+			"damage": import_animation("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Damage.png", [4,4]),
+			"dead": import_animation("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Dead.png", [4,4]),
+			"axe": import_animation("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Axe.png", [6,4]),
+			"bow": import_animation("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Bow and Arrow.png", [7,4]),
+			"sword": import_animation("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Sword.png", [10,4]),
+			"shovel": import_animation("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Shovel.png", [5,4]),
+			"pickaxe": import_animation("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Pickaxe.png", [6,4]),
+			"sickle": import_animation("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Sickle.png", [6,4]),
+			"hoe": import_animation("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Hoe.png", [6,4]),
+			"watering": import_animation("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Watering.png", [6,4]),
+			"sitting": import_animation("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Sitting.png", [3,1]),
+			"sleep": import_animation("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Sleep.png", [2,1]),
+			"climbing": import_animation("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Climbing.png", [5,1]),
+			"petting": import_animation("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Petting.png", [4,1]),
+		}
+		return textures
+	
 	def input(self):
 		keys = pygame.key.get_pressed()
 		max_acceleration = self.speed*5
 
+		if self.direction == [0,0]:
+			self.player_action = "idl"
+
 		if not self.is_attacking:
 			if keys[pygame.K_UP] or keys[pygame.K_w]:
 				self.player_direction = "up"
+				self.player_action = "walk"
 				self.direction.y = -1
-
+				
 				if self.acceleration.y < max_acceleration:
 					self.acceleration.y += 1
 
 			elif keys[pygame.K_DOWN] or keys[pygame.K_s]:
 				self.player_direction = "down"
+				self.player_action = "walk"
 				self.direction.y = 1
 
 				if self.acceleration.y > -max_acceleration:
@@ -89,6 +87,7 @@ class Player(pygame.sprite.Sprite):
 
 			if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
 				self.player_direction = "right"
+				self.player_action = "walk"
 				self.direction.x = 1
 
 				if self.acceleration.x > -max_acceleration:
@@ -96,6 +95,7 @@ class Player(pygame.sprite.Sprite):
 
 			elif keys[pygame.K_LEFT] or keys[pygame.K_a]:
 				self.player_direction = "left"
+				self.player_action = "walk"
 				self.direction.x = -1
 
 				if self.acceleration.x < max_acceleration:
@@ -109,6 +109,9 @@ class Player(pygame.sprite.Sprite):
 					self.acceleration.x -= 1
 
 			if keys[pygame.K_LSHIFT]:
+				if self.direction != [0,0]:	
+					self.player_action = "run"
+
 				if self.speed < self.sprint_speed:
 					self.speed += 1
 			else:
@@ -117,20 +120,12 @@ class Player(pygame.sprite.Sprite):
 		debug("Playerdir: " + self.player_direction, 50,10)
 		
 		
-		if keys[pygame.K_f]:
-			self.attack_direction = "atk_" + self.player_direction
-			debug(self.attack_direction, 70,10)
+		if keys[pygame.K_f] or self.is_attacking:
 			self.is_attacking = True
-
-		if keys[pygame.K_f] and keys[pygame.K_LSHIFT]:
-			self.is_attacking = False
- 
-		if self.direction == [0,0]:
-			self.skin_direction = "idl_" + self.player_direction
-		else:
-			self.skin_direction = "walk_" + self.player_direction
-
+			self.player_action = "sword"
+		
 		debug(self.direction,30,10)
+		debug(self.player_action, 70,10)
 
 			
 
@@ -151,24 +146,41 @@ class Player(pygame.sprite.Sprite):
 		if direction == 'horizontal':
 			for sprite in self.obstacle_sprites:
 				if sprite.hitbox.colliderect(self.hitbox):
-					if self.direction.x > 0: # moving right
+					if self.direction.x > 0:
 						self.hitbox.right = sprite.hitbox.left
-					if self.direction.x < 0: # moving left
+					if self.direction.x < 0:
 						self.hitbox.left = sprite.hitbox.right
 
 		if direction == 'vertical':
 			for sprite in self.obstacle_sprites:
 				if sprite.hitbox.colliderect(self.hitbox):
-					if self.direction.y > 0: # moving down
+					if self.direction.y > 0:
 						self.hitbox.bottom = sprite.hitbox.top
-					if self.direction.y < 0: # moving up
+					if self.direction.y < 0:
 						self.hitbox.top = sprite.hitbox.bottom
 
+
 	def draw(self):
-		self.image = self.animations_surface[self.skin_direction][self.animations_frame%len(self.animations_surface[self.skin_direction])]
-		self.rect = self.image.get_rect()
-		if cooldown("player_animation", self.animations_speed):
-			self.animations_frame += 1
+		if self.is_attacking:
+			self.image = self.animations_surface[self.player_action][self.player_direction][self.attacking_frame%len(self.animations_surface[self.player_action][self.player_direction])]
+			self.rect = self.image.get_rect()
+
+			if cooldown("player_animation", self.animations_speed/2):
+				self.attacking_frame += 1
+				if self.attacking_frame == len(self.animations_surface[self.player_action][self.player_direction]):
+					self.is_attacking = False
+					self.attacking_frame = 0
+
+
+		else:
+			self.image = self.animations_surface[self.player_action][self.player_direction][self.animations_frame%len(self.animations_surface[self.player_action][self.player_direction])]
+			self.rect = self.image.get_rect()
+			debug(self.image.get_rect(), 90,10)
+			if cooldown("player_animation", self.animations_speed):
+				self.animations_frame += 1
+
+		
+
 
 	def update(self):
 		self.input()
