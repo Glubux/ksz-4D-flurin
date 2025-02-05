@@ -19,7 +19,6 @@ class Level:
 		self.npcs = pygame.sprite.Group()
 
 		
-
 		self.inv_status = False
 		self.menu_status = False
 		self.dialog_status = False

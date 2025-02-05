@@ -17,7 +17,7 @@ class Dialog(pygame.sprite.Sprite):
 		self.dialog = None
 
 		self.dialog_count = 0
-		self.dialog_speed = 0.2
+		self.dialog_speed = 0.1
 		self.dialog_words = ""
 
 		self.font = pygame.font.SysFont("mongolianbaiti", 30)
