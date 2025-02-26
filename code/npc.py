@@ -9,7 +9,8 @@ class Npc(pygame.sprite.Sprite):
 		super().__init__(groups)
 		self.name = name
 		self.npc_data = npcs[name]
-		self.image = import_image(self.npc_data["img"], 1)
+		self.image = import_image(self.npc_data["img"])
+		self.image = pygame.transform.scale(self.image, (self.image.get_width()*4, self.image.get_height()*4))
 		self.pos = pos
 		self.rect = self.image.get_rect(topleft=(self.pos[0], self.pos[1]))
 		self.hitbox = self.rect.inflate(-10,-26)

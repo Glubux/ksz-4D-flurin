@@ -2,7 +2,7 @@ import pygame, sys
 from settings import *
 from tile import Tile
 from player import Player
-from debug import debug
+from debug import *
 from support import *
 from inventar import *
 from npc import *
@@ -13,8 +13,11 @@ class Level:
 		# get the display surface 
 		self.display_surface = pygame.display.get_surface()
 
+		self.season = "autom"
+		self.season_list = ["winter", "spring", "summer", "autom"]
+
 		# sprite group setup
-		self.visible_sprites = YSortCameraGroup()
+		self.visible_sprites = YSortCameraGroup(self.season)
 		self.obstacle_sprites = pygame.sprite.Group()
 		self.npcs = pygame.sprite.Group()
 
@@ -35,8 +38,67 @@ class Level:
 
 		self.dialog_ans = None
 
+
 		# sprite setup
-		self.create_map()
+		#self.create_map()
+		self.map()
+
+	def map(self):
+		season_setting = {
+			"winter": ["winter_deco", "boundary"],
+			"spring": ["spring_deco", "water_spring_summer", "boundary"],
+			"summer": ["summer_deco", "water_spring_summer", "boundary"],
+			"autom": ["autom_deco", "water_autom", "boundary"],
+		}
+		csv_data = {
+			"boundary": [import_csv_layout("../textures/map/map_obstacle_main.csv"), "None"],
+			"water_spring_summer": [import_csv_layout("../textures/map/map_Animation_water_spring_summer.csv"), "summer"],
+			"water_autom": [import_csv_layout("../textures/map/map_Animation_water_autom.csv"), "autom"],
+			
+			"spring_deco": [import_csv_layout("../textures/map/map_Spring_decoration.csv"), "spring"],
+			"summer_deco": [import_csv_layout("../textures/map/map_Summer_decoration.csv"), "summer"],
+			"autom_deco": [import_csv_layout("../textures/map/map_Autom_decoration.csv"), "autom"],
+			"winter_deco": [import_csv_layout("../textures/map/map_Winter_decoration.csv"), "winter"],
+
+		}
+		textures = {
+			"winter": import_tileset("tileset", "../textures/farm/Tileset/Tileset Winter.png", [15,14], (16,16), 4),
+			"summer": import_tileset("tileset", "../textures/farm/Tileset/Tileset Grass Summer.png", [25,22], (16,16), 4),
+			"spring": import_tileset("tileset", "../textures/farm/Tileset/Tileset Grass Spring.png", [25,27], (16,16), 4),
+			"autom": import_tileset("tileset", "../textures/farm/Tileset/Tileset Grass Fall.png", [25,22], (16,16), 4),
+			"boundary": import_tileset("tileset", "../textures/tiled/color_tiledset.png", [4,4], (16,16), 4)
+		}
+		
+		for style in season_setting[self.season]: # needed csv_data
+			layout = csv_data[style][0] # -> [surfacelist, textur_verweis]
+			
+			for row_index, row in enumerate(layout):
+				for coll_index, col in enumerate(row):
+					x = coll_index * TILESIZE
+					y = row_index * TILESIZE
+					
+					try:
+						col = int(col)
+					except ValueError:
+						print(f"ValueError: [{style}, {col}")
+						continue
+
+					if col != -1:
+						if style == "boundary":
+							Tile((x,y),[self.obstacle_sprites], ["background", style, col] ,textures["boundary"][col])
+						elif style == "water_spring_summer":
+							Tile((x,y),[self.visible_sprites], [style, "background"] ,textures["spring"][col])
+						elif style == "water_autom":
+							try:
+								Tile((x,y),[self.visible_sprites], [style, "background"] ,textures["autom"][col])
+							except IndexError:
+								print(f"IndexError: [{style}, {col}]")
+								print()
+								continue
+						else:
+							Tile((x,y),[self.visible_sprites], [style, "backgorund"], textures[self.season][col])
+
+		self.player = Player((1000,500),[self.visible_sprites],self.obstacle_sprites,"Alex")
 
 
 	def create_map(self):
@@ -56,20 +118,18 @@ class Level:
 						x = col_index * TILESIZE
 						y = row_index * TILESIZE
 						if style == 'boundary':
-							Tile((x,y),[self.obstacle_sprites],'invisible')
-
+							Tile((x,y),[self.obstacle_sprites],'invisible')  
+ 
 						if style == 'grass':
 							grass_img = textures['grass'][int(col)-64]
 							Tile((x,y),[self.visible_sprites,self.obstacle_sprites],'grass',grass_img)
 
 						if style == "npc":
-							#npc = Npc((x, y), [self.visible_sprites, self.npcs], self.obstacle_sprites, "schrödinger", self.dialog)
-							#self.npcs.add(npc)
+							npc = Npc((x, y), [self.visible_sprites, self.npcs], self.obstacle_sprites, "schrödinger", self.dialog)
+							self.npcs.add(npc)
 							pass
 
-
 		self.player = Player((1000,500),[self.visible_sprites],self.obstacle_sprites,"Alex")
-
 
 
 	def input(self):
@@ -139,7 +199,7 @@ class Level:
 
 
 class YSortCameraGroup(pygame.sprite.Group):
-	def __init__(self):
+	def __init__(self, season):
 
 		# general setup 
 		super().__init__()
@@ -148,22 +208,30 @@ class YSortCameraGroup(pygame.sprite.Group):
 		self.half_height = self.display_surface.get_size()[1] // 2
 		self.offset = pygame.math.Vector2()
 
-		# creating the floor
-		self.floor_surf = pygame.image.load('../textures/tilemap/ground.png').convert()
+		self.season = season
+
+		self.floor_surf = import_image(f'../textures/tiled/map_{self.season}.png')
+		self.floor_surf = pygame.transform.scale(self.floor_surf, (self.floor_surf.get_width()*4, self.floor_surf.get_height()*4))
 		self.floor_rect = self.floor_surf.get_rect(topleft = (0,0))
 
-	def custom_draw(self,player):
 
-		# getting the offset 
+	def custom_draw(self, player):
 		self.offset.x = player.rect.centerx - self.half_width + player.acceleration.x
 		self.offset.y = player.rect.centery - self.half_height + player.acceleration.y
-		self.offset.normalize()
 
-		# drawing the floor
 		floor_offset_pos = self.floor_rect.topleft - self.offset
-		self.display_surface.blit(self.floor_surf,floor_offset_pos)
+		self.display_surface.blit(self.floor_surf, floor_offset_pos)
 
-		# for sprite in self.sprites():
-		for sprite in sorted(self.sprites(),key = lambda sprite: sprite.rect.centery):
+		# auftrennen von Y-sored und background
+		background_sprites = [sprite for sprite in self.sprites() if getattr(sprite, "type", None) == "background"]
+		normal_sprites = [sprite for sprite in self.sprites() if getattr(sprite, "type", None) != "background"]
+
+		# ohne Y-Wert sortieren 
+		for sprite in background_sprites:
 			offset_pos = sprite.rect.topleft - self.offset
-			self.display_surface.blit(sprite.image,offset_pos)
+			self.display_surface.blit(sprite.image, offset_pos)
+
+		# mit Y-Wert sortieren
+		for sprite in sorted(normal_sprites, key=lambda sprite: sprite.rect.centery):
+			offset_pos = sprite.rect.topleft - self.offset
+			self.display_surface.blit(sprite.image, offset_pos)

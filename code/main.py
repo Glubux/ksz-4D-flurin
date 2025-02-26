@@ -1,7 +1,8 @@
 import pygame, sys
 from settings import *
 from level import Level
-4
+from debug import *
+
 class Game: 
 	def __init__(self):
 
@@ -27,6 +28,8 @@ class Game:
 			self.level.run()
 			pygame.display.update()
 			self.clock.tick(FPS)
+
+			#print(round(self.clock.get_fps()))
 
 	def key_handler(self):
 		keys = pygame.key.get_pressed()

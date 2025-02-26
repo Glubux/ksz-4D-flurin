@@ -34,23 +34,23 @@ class Player(pygame.sprite.Sprite):
 
 	def load_textures(self):
 		textures = {
-			"walk": import_animation("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Walk.png", [6,4]),
-			"run": import_animation("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Run.png", [8,4]),
-			"idl": import_animation("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Idle.png", [4,4]),
-			"damage": import_animation("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Damage.png", [4,4]),
-			"dead": import_animation("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Dead.png", [4,4]),
-			"axe": import_animation("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Axe.png", [6,4]),
-			"bow": import_animation("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Bow and Arrow.png", [7,4]),
-			"sword": import_animation("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Sword.png", [10,4]),
-			"shovel": import_animation("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Shovel.png", [5,4]),
-			"pickaxe": import_animation("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Pickaxe.png", [6,4]),
-			"sickle": import_animation("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Sickle.png", [6,4]),
-			"hoe": import_animation("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Hoe.png", [6,4]),
-			"watering": import_animation("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Watering.png", [6,4]),
-			"sitting": import_animation("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Sitting.png", [3,1]),
-			"sleep": import_animation("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Sleep.png", [2,1]),
-			"climbing": import_animation("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Climbing.png", [5,1]),
-			"petting": import_animation("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Petting.png", [4,1]),
+			"walk": import_tileset("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Walk.png", [6,4]),
+			"run": import_tileset("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Run.png", [8,4]),
+			"idl": import_tileset("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Idle.png", [4,4]),
+			"damage": import_tileset("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Damage.png", [4,4]),
+			"dead": import_tileset("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Dead.png", [4,4]),
+			"axe": import_tileset("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Axe.png", [6,4]),
+			"bow": import_tileset("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Bow and Arrow.png", [7,4]),
+			"sword": import_tileset("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Sword.png", [10,4]),
+			"shovel": import_tileset("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Shovel.png", [5,4]),
+			"pickaxe": import_tileset("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Pickaxe.png", [6,4]),
+			"sickle": import_tileset("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Sickle.png", [6,4]),
+			"hoe": import_tileset("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Hoe.png", [6,4]),
+			"watering": import_tileset("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Watering.png", [6,4]),
+			"sitting": import_tileset("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Sitting.png", [3,1]),
+			"sleep": import_tileset("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Sleep.png", [2,1]),
+			"climbing": import_tileset("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Climbing.png", [5,1]),
+			"petting": import_tileset("character", "../textures/character and portrait/Character/Pre-made/"+self.skin_name+"/Petting.png", [4,1]),
 		}
 		return textures
 	
@@ -122,13 +122,12 @@ class Player(pygame.sprite.Sprite):
 		
 		if keys[pygame.K_f] or self.is_attacking:
 			self.is_attacking = True
-			self.player_action = "sword"
+			self.player_action = "shovel"
 		
 		debug(self.direction,30,10)
 		debug(self.player_action, 70,10)
 
-			
-
+		
 	def move(self,speed):
 		if self.direction.magnitude() != 0:
 			self.direction = self.direction.normalize()

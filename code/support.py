@@ -32,7 +32,7 @@ def import_image(path):
 	else:
 		return pygame.image.load(path).convert_alpha()
 	
-def import_animation(anymation_type, path, amount_frames, size=(32,32), scale_faktor=4.5, exception=None):
+def import_tileset(anymation_type, path, amount_frames, size=(32,32), scale_faktor=4.5, meta=None):
 	img = import_image(path)
 	if anymation_type == "character":
 		direction = ["down", "up", "right", "left"]
@@ -56,10 +56,23 @@ def import_animation(anymation_type, path, amount_frames, size=(32,32), scale_fa
 					
 				frames.append(frame_surface)
 			animation[direction[y]] = frames
-	return animation
+		return animation
+	
+	if anymation_type == "tileset":
+		sub_surfaces = []
+
+		for y in range(amount_frames[1]):
+			for x in range(amount_frames[0]):
+				sub_surface = img.subsurface((x*size[0], y*size[1], size[0], size[1]))
+				sub_surface = pygame.transform.scale(sub_surface, (size[0]*scale_faktor, size[1]*scale_faktor))
+				sub_surfaces.append(sub_surface)
+
+		return sub_surfaces
+	
+		
 
 cooldowns = {}
-def cooldown(name, duration=1):
+def cooldown(name: str, duration=1):
 	current_time = pygame.time.get_ticks() / 1000
 
 	if name in cooldowns:
