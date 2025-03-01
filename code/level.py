@@ -19,6 +19,7 @@ class Level:
 		# sprite group setup
 		self.visible_sprites = YSortCameraGroup(self.season)
 		self.obstacle_sprites = pygame.sprite.Group()
+		self.water_group = pygame.sprite.Group()
 		self.npcs = pygame.sprite.Group()
 
 		
@@ -30,6 +31,7 @@ class Level:
 		self.menu = Menu()
 		self.inv = Inventar()
 		self.dialog = Dialog()
+		self.time = Time()
 
 		self.menu_data = None
 		self.inv_data = None
@@ -85,18 +87,20 @@ class Level:
 
 					if col != -1:
 						if style == "boundary":
-							Tile((x,y),[self.obstacle_sprites], ["background", style, col] ,textures["boundary"][col])
+							if col == 0: # wasser
+								Tile((x,y),[self.visible_sprites, self.water_group], ["background", style] ,textures["boundary"][col])
+							elif col == 12: # border
+								Tile((x,y),[self.obstacle_sprites, self.visible_sprites], ["background", style] ,textures["boundary"][col])
+						
 						elif style == "water_spring_summer":
 							Tile((x,y),[self.visible_sprites], [style, "background"] ,textures["spring"][col])
 						elif style == "water_autom":
-							try:
-								Tile((x,y),[self.visible_sprites], [style, "background"] ,textures["autom"][col])
-							except IndexError:
-								print(f"IndexError: [{style}, {col}]")
-								print()
-								continue
+							Tile((x,y),[self.visible_sprites], [style, "background"] ,textures["autom"][col])
+							
 						else:
 							Tile((x,y),[self.visible_sprites], [style, "backgorund"], textures[self.season][col])
+
+
 
 		self.player = Player((1000,500),[self.visible_sprites],self.obstacle_sprites,"Alex")
 
@@ -119,7 +123,7 @@ class Level:
 						y = row_index * TILESIZE
 						if style == 'boundary':
 							Tile((x,y),[self.obstacle_sprites],'invisible')  
- 
+
 						if style == 'grass':
 							grass_img = textures['grass'][int(col)-64]
 							Tile((x,y),[self.visible_sprites,self.obstacle_sprites],'grass',grass_img)
@@ -165,6 +169,7 @@ class Level:
 		# update and draw the game
 		self.visible_sprites.custom_draw(self.player)
 		self.input()
+		self.time.update()
 
 		self.dialog_ans = self.dialog.update()
 
@@ -197,6 +202,12 @@ class Level:
 			for npc in self.npcs:
 				npc.update_player_pos(self.player.rect.center)
 
+		if self.colide():
+			#print("water")
+			pass
+
+	def colide(self):
+		return pygame.sprite.spritecollideany(self.player, self.water_group, pygame.sprite.collide_rect)
 
 class YSortCameraGroup(pygame.sprite.Group):
 	def __init__(self, season):
@@ -235,3 +246,94 @@ class YSortCameraGroup(pygame.sprite.Group):
 		for sprite in sorted(normal_sprites, key=lambda sprite: sprite.rect.centery):
 			offset_pos = sprite.rect.topleft - self.offset
 			self.display_surface.blit(sprite.image, offset_pos)
+
+
+
+class DayNightCycle:
+	"""Die DayNightCycle Funktion ist mit starken Unterstützung von ChatGPT geschrieben worden"""
+
+	def __init__(self):
+		self.screen = pygame.display.get_surface()
+
+		self.day_color = pygame.Color(0, 0, 0, 0)
+		self.night_color = pygame.Color(0, 0, 10, 180)
+
+	def get_time_factor(self, hour, minute):
+		if 21 <= hour < 22:
+			return (hour - 21) + (minute / 60)
+		elif 6 <= hour < 7:
+			return 1 - ((hour - 6) + (minute / 60))
+		elif 22 <= hour or hour < 6:
+			return 1.0
+		else:
+			return 0.0
+
+	def update(self, hour, minute):
+		factor = self.get_time_factor(hour, minute)
+		self.current_color = self.smooth_transition(self.day_color, self.night_color, factor)
+
+	def smooth_transition(self, start_color, end_color, factor):
+		r = int(start_color.r + (end_color.r - start_color.r) * factor)
+		g = int(start_color.g + (end_color.g - start_color.g) * factor)
+		b = int(start_color.b + (end_color.b - start_color.b) * factor)
+		a = int(start_color.a + (end_color.a - start_color.a) * factor)
+		return pygame.Color(r, g, b, a)
+
+	def draw(self):
+		overlay = pygame.Surface((WIDTH, HEIGTH), pygame.SRCALPHA)
+		overlay.fill(self.current_color)
+		self.screen.blit(overlay, (0, 0))
+
+
+
+class Time():
+	def __init__(self):
+		self.season_list = ["spring", "summer", "autumn", "winter"]
+		self.time = {
+			"year": 1,
+			"season": "spring",
+			"day": 1,
+			"hour": 12,
+			"minute": 0
+		}
+		self.gameminute_in_seconds = 0.8
+		self.time_sprint = 1
+
+		self.day_night_cycle = DayNightCycle()
+
+	def calculate_time(self):
+		if cooldown("gameminute", self.gameminute_in_seconds * self.time_sprint):
+			self.time["minute"] += 1
+			if self.time["minute"] >= 60:
+				self.time["minute"] = 0
+				self.time["hour"] += 1
+				if self.time["hour"] >= 24:
+					self.time["hour"] = 0
+					self.time["day"] += 1
+					if self.time["day"] > 28:
+						self.time["day"] = 1
+						self.time["season"] = self.season_list[(self.season_list.index(self.time["season"]) + 1) % 4]
+						if self.time["season"] == "spring":
+							self.time["year"] += 1
+	
+	def key_handler(self):
+		keys = pygame.key.get_pressed()
+
+		if keys[pygame.K_i]:
+			if cooldown("time_speed_input", 0.2):
+				self.time_sprint += 0.2
+		elif keys[pygame.K_o]:
+			if cooldown("time_speed_input", 0.2):
+				self.time_sprint -= 0.2
+		elif keys[pygame.K_p]:
+			self.time_sprint = 0.8
+
+	def update(self):
+		self.day_night_cycle.update(self.time["hour"], self.time["minute"])
+		self.day_night_cycle.draw()
+		self.calculate_time()
+		self.key_handler()
+		
+		debug(f"{self.time["season"]} {self.time["day"]}. {self.time["hour"]}:{self.time["minute"]}", 200, 10)
+
+		return self.time
