@@ -1,12 +1,43 @@
 import pygame
+from support import *
 
-# game setup
-WIDTH    = 1550
-HEIGTH   = 880
+WIDTH = 1950
+HEIGHT = 1200
 FPS      = 60
 TILESIZE = 64
 
+register_item(
+    name="wood",
+    description="simple wood",
+    inv_img="../img/wood.png"
+)
+register_item(
+    name="stone",
+    description="simple stone",
+    inv_img="../img/stone.png"
+)
+register_item(
+    name="sword",
+    description="simple sword",
+    inv_img="../img/sword.png"
+)
+register_item(
+    name="shield",
+    description="simple shield",
+    inv_img="../img/shiled.png"
+)
 
+"""
+Dev-Test Prints
+===============
+
+print("----------")
+print(get_item_list())
+print("----------")
+print(get_item("stone"))
+print("----------")
+print(items)
+"""
 
 npcs = {
     "schrödinger": {

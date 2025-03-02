@@ -9,40 +9,33 @@ from npc import *
 
 class Level:
 	def __init__(self):
-
-		# get the display surface 
 		self.display_surface = pygame.display.get_surface()
 
 		self.season = "autom"
 		self.season_list = ["winter", "spring", "summer", "autom"]
 
-		# sprite group setup
 		self.visible_sprites = YSortCameraGroup(self.season)
 		self.obstacle_sprites = pygame.sprite.Group()
 		self.water_group = pygame.sprite.Group()
 		self.npcs = pygame.sprite.Group()
-
-		
-		self.inv_status = False
-		self.menu_status = False
-		self.dialog_status = False
 
 		self.hotbar = Hotbar()
 		self.menu = Menu()
 		self.inv = Inventar()
 		self.dialog = Dialog()
 		self.time = Time()
+		self.fade = FadeEffect()
+		
+		self.inv_status = False
+		self.menu_status = False
+		self.dialog_status = False
 
 		self.menu_data = None
 		self.inv_data = None
 
 		self.inv_update_ans = None
-
 		self.dialog_ans = None
 
-
-		# sprite setup
-		#self.create_map()
 		self.map()
 
 	def map(self):
@@ -78,19 +71,14 @@ class Level:
 				for coll_index, col in enumerate(row):
 					x = coll_index * TILESIZE
 					y = row_index * TILESIZE
-					
-					try:
-						col = int(col)
-					except ValueError:
-						print(f"ValueError: [{style}, {col}")
-						continue
+					col = int(col)
 
 					if col != -1:
 						if style == "boundary":
 							if col == 0: # wasser
-								Tile((x,y),[self.visible_sprites, self.water_group], ["background", style] ,textures["boundary"][col])
+								Tile((x,y),[self.visible_sprites, self.water_group], [style, "background", col] ,textures["boundary"][col])
 							elif col == 12: # border
-								Tile((x,y),[self.obstacle_sprites, self.visible_sprites], ["background", style] ,textures["boundary"][col])
+								Tile((x,y),[self.obstacle_sprites, self.visible_sprites], [style, "background", col] ,textures["boundary"][col])
 						
 						elif style == "water_spring_summer":
 							Tile((x,y),[self.visible_sprites], [style, "background"] ,textures["spring"][col])
@@ -99,34 +87,6 @@ class Level:
 							
 						else:
 							Tile((x,y),[self.visible_sprites], [style, "backgorund"], textures[self.season][col])
-
-
-
-		self.player = Player((1000,500),[self.visible_sprites],self.obstacle_sprites,"Alex")
-
-
-	def create_map(self):
-		layouts = {
-			'boundary': import_csv_layout('../map/map1_border.csv'),
-			'grass': import_csv_layout('../map/map1_grass.csv'),
-			"npc": import_csv_layout("../textures/Tiled_work/npc.csv")
-		}
-		textures = {
-			'grass': import_folder('../textures/grass'),
-		}
-
-		for style,layout in layouts.items():
-			for row_index,row in enumerate(layout):
-				for col_index, col in enumerate(row):
-					if col != '-1':
-						x = col_index * TILESIZE
-						y = row_index * TILESIZE
-						if style == 'boundary':
-							Tile((x,y),[self.obstacle_sprites],'invisible')  
-
-						if style == 'grass':
-							grass_img = textures['grass'][int(col)-64]
-							Tile((x,y),[self.visible_sprites,self.obstacle_sprites],'grass',grass_img)
 
 						if style == "npc":
 							npc = Npc((x, y), [self.visible_sprites, self.npcs], self.obstacle_sprites, "schrödinger", self.dialog)
@@ -147,29 +107,37 @@ class Level:
 					else:
 						self.inv_status = True
 						self.inv.open_inv()
+						self.fade.set_fade(50, 0.5)
 
 				else:
 					self.inv.close_inv()
-					pass
+					self.fade.set_fade(0, 0.7)
+					
 
 		if keys[pygame.K_ESCAPE]:
 			if cooldown("open_menu", 0.5):
 				if not self.menu_status:
 					if self.inv_status:
 						self.inv.close_inv()
+						self.fade.set_fade(0, 0.7)
+
 					else:
 						self.menu_status = True
 						self.menu.open_menu()
+						self.fade.set_fade(50, 0.5)
 				
 				else:
-					self.menu.close_menu()
 					self.menu_status = False
+					self.menu.close_menu()
+					self.fade.set_fade(0, 1, True)
+
 		
 	def run(self):
 		# update and draw the game
 		self.visible_sprites.custom_draw(self.player)
 		self.input()
 		self.time.update()
+		self.fade.update()
 
 		self.dialog_ans = self.dialog.update()
 
@@ -280,7 +248,7 @@ class DayNightCycle:
 		return pygame.Color(r, g, b, a)
 
 	def draw(self):
-		overlay = pygame.Surface((WIDTH, HEIGTH), pygame.SRCALPHA)
+		overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
 		overlay.fill(self.current_color)
 		self.screen.blit(overlay, (0, 0))
 

@@ -11,18 +11,15 @@ class Player(pygame.sprite.Sprite):
 		self.rect = self.image.get_rect(topleft = pos)
 		self.hitbox = self.rect.inflate(-70,-50)
 
+		self.acceleration = pygame.math.Vector2()
 		self.direction = pygame.math.Vector2()
 		self.player_direction = "down"
 		self.player_action = "idle"
-
 
 		self.normal_speed = 4
 		self.sprint_speed = 6
 		self.speed = self.normal_speed
 		self.obstacle_sprites = obstacle_sprites
-
-		self.acceleration = pygame.math.Vector2()
-
 
 		self.animations_surface = self.load_textures()
 		self.animations_frame = 0
@@ -116,16 +113,10 @@ class Player(pygame.sprite.Sprite):
 					self.speed += 1
 			else:
 				self.speed = self.normal_speed
-
-		debug("Playerdir: " + self.player_direction, 50,10)
-		
 		
 		if keys[pygame.K_f] or self.is_attacking:
 			self.is_attacking = True
 			self.player_action = "shovel"
-		
-		debug(self.direction,30,10)
-		debug(self.player_action, 70,10)
 
 		
 	def move(self,speed):
@@ -170,16 +161,11 @@ class Player(pygame.sprite.Sprite):
 					self.is_attacking = False
 					self.attacking_frame = 0
 
-
 		else:
 			self.image = self.animations_surface[self.player_action][self.player_direction][self.animations_frame%len(self.animations_surface[self.player_action][self.player_direction])]
 			self.rect = self.image.get_rect()
-			debug(self.image.get_rect(), 90,10)
 			if cooldown("player_animation", self.animations_speed):
 				self.animations_frame += 1
-
-		
-
 
 	def update(self):
 		self.input()

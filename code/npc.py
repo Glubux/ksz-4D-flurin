@@ -52,4 +52,3 @@ class Npc(pygame.sprite.Sprite):
 
 		if self.is_inrange:
 			self.ans_keyhandler = self.key_handler()
-			

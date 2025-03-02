@@ -105,3 +105,48 @@ def get_item(name):
 
 def get_item_list():
 	return list(items.keys())
+
+
+
+class FadeEffect:
+	def __init__(self):
+		self.screen = pygame.display.get_surface()
+		self.target_alpha = 0
+		self.current_alpha = 0
+		self.fade_speed = 0
+		self.surface = pygame.Surface((self.screen.get_width(), self.screen.get_height()))
+		self.surface.fill((0, 0, 0))
+		self.surface.set_alpha(self.current_alpha)
+		self.fade_start_time = 0
+		self.fade_duration = 0
+		self.is_fading = False
+		self.start_alpha = 0
+
+	def set_fade(self, target_percent, time_seconds, instant=False):
+		self.target_alpha = int(target_percent * 255 / 100)
+
+		if instant:
+			self.current_alpha = self.target_alpha
+			self.surface.set_alpha(self.current_alpha)
+			self.is_fading = False
+		else:
+			self.start_alpha = self.current_alpha
+			self.fade_duration = time_seconds
+			self.fade_start_time = pygame.time.get_ticks()
+			self.is_fading = True
+
+	def update(self):
+		if self.is_fading:
+			elapsed_time = (pygame.time.get_ticks() - self.fade_start_time) / 1000.0
+
+			if elapsed_time >= self.fade_duration:
+				self.current_alpha = self.target_alpha
+				self.is_fading = False
+			else:
+				progress = elapsed_time / self.fade_duration
+				self.current_alpha = int(self.start_alpha + (self.target_alpha - self.start_alpha) * progress)
+
+			self.surface.set_alpha(self.current_alpha)
+
+		self.screen.blit(self.surface, (0, 0))
+		return not self.is_fading

@@ -2,14 +2,12 @@ import pygame, sys
 from settings import *
 from level import Level
 from debug import *
+from support import *
 
 class Game: 
 	def __init__(self):
-
-		# general setup
 		pygame.init()
-		self.screen = pygame.display.set_mode((WIDTH,HEIGTH))
-		pygame.display.set_caption('Zelda')
+		self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 		self.clock = pygame.time.Clock()
 		self.game_running = True
 
@@ -28,7 +26,6 @@ class Game:
 			self.level.run()
 			pygame.display.update()
 			self.clock.tick(FPS)
-
 			#print(round(self.clock.get_fps()))
 
 	def key_handler(self):

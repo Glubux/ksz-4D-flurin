@@ -12,7 +12,6 @@ class Dialog(pygame.sprite.Sprite):
 		self.textures = self.load_grafics()
 
 		self.status = False
-
 		self.player = None
 		self.dialog = None
 
@@ -31,14 +30,13 @@ class Dialog(pygame.sprite.Sprite):
 
 	def key_handler(self):
 		keys = pygame.key.get_pressed()
-		ans = None
 
 		if keys[pygame.K_RETURN]:
 			if self.dialog_count+1 >= len(self.dialog_words):
 				self.status = False
 
 	def draw(self, dialog_words, dialog_count):
-		pos = (120, HEIGTH - 300)
+		pos = (120, HEIGHT - 300)
 		scale = 1.5
 		max_width = 656 * 2 - 40
 		line_height = 30 * scale
@@ -78,7 +76,6 @@ class Dialog(pygame.sprite.Sprite):
 				self.dialog_count += 1
 			
 			self.draw(self.dialog_words, self.dialog_count)
-
 
 		self.key_handler()
 		return self.status
