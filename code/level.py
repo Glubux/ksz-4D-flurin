@@ -1,6 +1,6 @@
 import pygame, sys
 from settings import *
-from tile import Tile
+from tile import *
 from player import Player
 from debug import *
 from support import *
@@ -11,21 +11,26 @@ class Level:
 	def __init__(self):
 		self.display_surface = pygame.display.get_surface()
 
-		self.season = "autom"
+		self.menu = Menu()
+		self.inv = Inventar()
+		self.dialog = Dialog()
+		self.time = Time()
+		self.fade = FadeEffect()
+
+		self.ingametime = self.time.update()
+
+		self.season = self.ingametime["season"]
+		self.season_current = self.season
+		self.day_current = self.ingametime["day"]
 		self.season_list = ["winter", "spring", "summer", "autom"]
 
 		self.visible_sprites = YSortCameraGroup(self.season)
 		self.obstacle_sprites = pygame.sprite.Group()
 		self.water_group = pygame.sprite.Group()
 		self.npcs = pygame.sprite.Group()
+		self.plants = pygame.sprite.Group()
 
-		self.hotbar = Hotbar()
-		self.menu = Menu()
-		self.inv = Inventar()
-		self.dialog = Dialog()
-		self.time = Time()
-		self.fade = FadeEffect()
-		
+
 		self.inv_status = False
 		self.menu_status = False
 		self.dialog_status = False
@@ -36,17 +41,20 @@ class Level:
 		self.inv_update_ans = None
 		self.dialog_ans = None
 
-		self.map()
+		self.map(self.season)
 
-	def map(self):
-		season_setting = {
+		
+
+	def map(self, season):
+		self.season_setting = {
 			"winter": ["winter_deco", "boundary"],
-			"spring": ["spring_deco", "water_spring_summer", "boundary"],
-			"summer": ["summer_deco", "water_spring_summer", "boundary"],
-			"autom": ["autom_deco", "water_autom", "boundary"],
+			"spring": ["spring_deco", "water_spring_summer", "boundary", "plants"],
+			"summer": ["summer_deco", "water_spring_summer", "boundary", "plants"],
+			"autom": ["autom_deco", "water_autom", "boundary", "plants"],
 		}
-		csv_data = {
+		self.csv_data = {
 			"boundary": [import_csv_layout("../textures/map/map_obstacle_main.csv"), "None"],
+			"plants": [import_csv_layout("../textures/map/map_obstacle_plants.csv"), "None"],
 			"water_spring_summer": [import_csv_layout("../textures/map/map_Animation_water_spring_summer.csv"), "summer"],
 			"water_autom": [import_csv_layout("../textures/map/map_Animation_water_autom.csv"), "autom"],
 			
@@ -56,16 +64,17 @@ class Level:
 			"winter_deco": [import_csv_layout("../textures/map/map_Winter_decoration.csv"), "winter"],
 
 		}
-		textures = {
+		self.textures = {
 			"winter": import_tileset("tileset", "../textures/farm/Tileset/Tileset Winter.png", [15,14], (16,16), 4),
 			"summer": import_tileset("tileset", "../textures/farm/Tileset/Tileset Grass Summer.png", [25,22], (16,16), 4),
 			"spring": import_tileset("tileset", "../textures/farm/Tileset/Tileset Grass Spring.png", [25,27], (16,16), 4),
 			"autom": import_tileset("tileset", "../textures/farm/Tileset/Tileset Grass Fall.png", [25,22], (16,16), 4),
-			"boundary": import_tileset("tileset", "../textures/tiled/color_tiledset.png", [4,4], (16,16), 4)
+			"boundary": import_tileset("tileset", "../textures/tiled/color_tiledset.png", [4,4], (16,16), 4),
+			"plants": import_tileset("tileset", "../textures/tiled/color_tiledset.png", [4,4], (16,16), 4),
 		}
 		
-		for style in season_setting[self.season]: # needed csv_data
-			layout = csv_data[style][0] # -> [surfacelist, textur_verweis]
+		for style in self.season_setting[season]: # needed self.csv_data
+			layout = self.csv_data[style][0] # -> [surfacelist, textur_verweis]
 			
 			for row_index, row in enumerate(layout):
 				for coll_index, col in enumerate(row):
@@ -76,17 +85,22 @@ class Level:
 					if col != -1:
 						if style == "boundary":
 							if col == 0: # wasser
-								Tile((x,y),[self.visible_sprites, self.water_group], [style, "background", col] ,textures["boundary"][col])
+								Tile((x,y),[self.visible_sprites, self.water_group], [style, "background", col] ,self.textures["boundary"][col])
 							elif col == 12: # border
-								Tile((x,y),[self.obstacle_sprites, self.visible_sprites], [style, "background", col] ,textures["boundary"][col])
+								Tile((x,y),[self.obstacle_sprites, self.visible_sprites], [style, "background", col] ,self.textures["boundary"][col])
 						
 						elif style == "water_spring_summer":
-							Tile((x,y),[self.visible_sprites], [style, "background"] ,textures["spring"][col])
+							Tile((x,y),[self.visible_sprites], [style, "background"] ,self.textures["spring"][col])
 						elif style == "water_autom":
-							Tile((x,y),[self.visible_sprites], [style, "background"] ,textures["autom"][col])
+							Tile((x,y),[self.visible_sprites], [style, "background"] ,self.textures["autom"][col])
+
+						elif style == "plants":
+							
+							Plants((x,y),[self.visible_sprites, self.plants], {"style": style, "col": col, "pos": (x,y)})
+							Tile((x,y),[self.visible_sprites], [style, "background"], self.textures["boundary"][col])
 							
 						else:
-							Tile((x,y),[self.visible_sprites], [style, "backgorund"], textures[self.season][col])
+							Tile((x,y),[self.visible_sprites], [style, "backgorund"], self.textures[self.season][col])
 
 						if style == "npc":
 							npc = Npc((x, y), [self.visible_sprites, self.npcs], self.obstacle_sprites, "schrödinger", self.dialog)
@@ -112,7 +126,7 @@ class Level:
 				else:
 					self.inv.close_inv()
 					self.fade.set_fade(0, 0.7)
-					
+
 
 		if keys[pygame.K_ESCAPE]:
 			if cooldown("open_menu", 0.5):
@@ -131,12 +145,30 @@ class Level:
 					self.menu.close_menu()
 					self.fade.set_fade(0, 1, True)
 
+		if keys[pygame.K_c]:
+			x = self.player.rect.centerx
+			y = self.player.rect.centery
+			Tile((x,y),[self.visible_sprites], ["style", "background"], self.textures["boundary"][0])
+
+
 		
 	def run(self):
 		# update and draw the game
 		self.visible_sprites.custom_draw(self.player)
 		self.input()
-		self.time.update()
+		self.ingametime = self.time.update()
+		if self.ingametime["season"] != self.season_current:
+			self.season_current = self.ingametime["season"]
+			self.season = self.season_current
+			self.visible_sprites.empty()
+			self.visible_sprites.__init__(self.season)
+			self.map(self.season)
+
+		if self.ingametime["day"] != self.day_current:
+			self.day_current = self.ingametime["day"]
+			for plant in self.plants:
+				plant.grow_update(self.season)
+
 		self.fade.update()
 
 		self.dialog_ans = self.dialog.update()
@@ -156,14 +188,15 @@ class Level:
 				sys.exit()
 			
 		elif self.inv_status:
-			self.inv_update_ans = self.inv.update()
+			self.inv_update_ans = self.inv.update("inv")
 			print(self.inv_update_ans)
 			if self.inv_update_ans["status"] == "closed":
 				self.inv_status = False
 				self.inv.status = ""
 		
 		else:
-			self.hotbar.update()
+			self.inv_update_ans = self.inv.update("hotbar")
+			self.time.draw()
 
 			self.visible_sprites.update()
 
@@ -256,33 +289,42 @@ class DayNightCycle:
 
 class Time():
 	def __init__(self):
-		self.season_list = ["spring", "summer", "autumn", "winter"]
+		self.screen = pygame.display.get_surface()
+		self.font = pygame.font.SysFont("mongolianbaiti", 50)
+		self.season_list = ["spring", "summer", "autom", "winter"]
+		self.weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 		self.time = {
 			"year": 1,
 			"season": "spring",
-			"day": 1,
+			"day": 28,
 			"hour": 12,
-			"minute": 0
+			"minute": 0,
+			"weekday": self.weekdays[0]
 		}
+		self.images = self.load_images()
+		self.rect = self.images["morning"][0].get_rect()
+		self.images_count = 0
 		self.gameminute_in_seconds = 0.8
 		self.time_sprint = 1
 
 		self.day_night_cycle = DayNightCycle()
 
 	def calculate_time(self):
+		debug(self.gameminute_in_seconds * self.time_sprint, 700, 100)
 		if cooldown("gameminute", self.gameminute_in_seconds * self.time_sprint):
 			self.time["minute"] += 1
 			if self.time["minute"] >= 60:
 				self.time["minute"] = 0
 				self.time["hour"] += 1
-				if self.time["hour"] >= 24:
-					self.time["hour"] = 0
-					self.time["day"] += 1
-					if self.time["day"] > 28:
-						self.time["day"] = 1
-						self.time["season"] = self.season_list[(self.season_list.index(self.time["season"]) + 1) % 4]
-						if self.time["season"] == "spring":
-							self.time["year"] += 1
+			if self.time["hour"] >= 24:
+				self.time["hour"] = 0
+				self.time["day"] += 1
+				self.time["weekday"] = self.weekdays[(self.weekdays.index(self.time["weekday"]) + 1) % 7]
+			if self.time["day"] > 28:
+				self.time["day"] = 1
+				self.time["season"] = self.season_list[(self.season_list.index(self.time["season"]) + 1) % 4]
+			if self.time["season"] == "spring":
+				self.time["year"] += 1
 	
 	def key_handler(self):
 		keys = pygame.key.get_pressed()
@@ -293,15 +335,69 @@ class Time():
 		elif keys[pygame.K_o]:
 			if cooldown("time_speed_input", 0.2):
 				self.time_sprint -= 0.2
+
+		elif keys[pygame.K_l]:
+			if cooldown("test", 0.2):
+				self.time["day"] += 1
+		
 		elif keys[pygame.K_p]:
 			self.time_sprint = 0.8
 
+
+	def load_images(self):
+		self.scale_faktor = 1.5
+		self.background_scale = 1.8
+
+		raw_images = {
+			"morning": import_folder("../textures/Premium Pack v1.0/Premium Pack v1.0/1 Green Book/1 Sprites/Day & Night Cycle/Inventory Book/1 Dawn/"),
+			"day": import_folder("../textures/Premium Pack v1.0/Premium Pack v1.0/1 Green Book/1 Sprites/Day & Night Cycle/Inventory Book/2 Day/"),
+			"evening": import_folder("../textures/Premium Pack v1.0/Premium Pack v1.0/1 Green Book/1 Sprites/Day & Night Cycle/Inventory Book/3 Noon/"),
+			"night": import_folder("../textures/Premium Pack v1.0/Premium Pack v1.0/1 Green Book/1 Sprites/Day & Night Cycle/Inventory Book/4 Night/"),
+			"time_background": import_image("../textures/Premium Pack v1.0/Premium Pack v1.0/1 Green Book/1 Sprites/Paper UI Pack/Paper UI/Plain/6 Player HUD/1.png")
+		}
+
+		scaled_images = {}
+
+		for key in ["morning", "day", "evening", "night"]:
+			scaled_images[key] = [pygame.transform.scale(img, (int(img.get_width() * self.scale_faktor), int(img.get_height() * self.scale_faktor))) for img in raw_images[key]]
+
+		time_background_image = raw_images["time_background"]
+		scaled_images["time_background"] = pygame.transform.scale(time_background_image, (int(time_background_image.get_width() * self.background_scale), int(time_background_image.get_height() * self.background_scale)))
+
+		return scaled_images
+
+
+	def draw(self):
+		if 20 <= self.time["hour"] < 23:
+			image_list = self.images["evening"]
+		elif 22 <= self.time["hour"] or self.time["hour"] < 5:
+			image_list = self.images["night"]
+		elif 5 <= self.time["hour"] < 8:
+			image_list = self.images["morning"]
+		elif 8 <= self.time["hour"] < 20:
+			image_list = self.images["day"]
+		
+		if cooldown("draw_time_image", 0.1):
+			self.images_count = (self.images_count + 1) % len(image_list)
+
+		pos = [WIDTH - self.images["time_background"].get_width()-50 ,0]
+
+
+		time_text_1 = self.font.render(f"{self.time["weekday"]} | {self.time["day"]}", True, "black")
+		time_text_2 = self.font.render(f"{self.time["hour"]}:{self.time["minute"]} ", True, "black")
+		
+		self.screen.blit(self.images["time_background"], pos)
+		self.screen.blit(image_list[self.images_count], [pos[0] + 280, pos[1] + 70])
+		self.screen.blit(time_text_1, [pos[0] + 100, pos[1] + 100])
+		self.screen.blit(time_text_2, [pos[0] + 100, pos[1] + 150])
+
+		
 	def update(self):
 		self.day_night_cycle.update(self.time["hour"], self.time["minute"])
 		self.day_night_cycle.draw()
 		self.calculate_time()
 		self.key_handler()
-		
+
 		debug(f"{self.time["season"]} {self.time["day"]}. {self.time["hour"]}:{self.time["minute"]}", 200, 10)
 
 		return self.time

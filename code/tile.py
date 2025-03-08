@@ -1,5 +1,7 @@
 import pygame
 from settings import *
+from random import *
+from debug import *
 
 class Tile(pygame.sprite.Sprite):
     def __init__(self, pos, groups, sprite_type, surface=pygame.Surface((TILESIZE, TILESIZE))):
@@ -25,3 +27,41 @@ class Tile(pygame.sprite.Sprite):
         
         self.rect = self.image.get_rect(topleft=pos)
         self.hitbox = self.rect.inflate(0, -10)
+
+class Plants(pygame.sprite.Sprite):
+    def __init__(self, pos, groups, data):
+        super().__init__(groups)
+        self.pos = pos
+        self.data = data
+
+        self.grow_count = 0
+        self.grow_level = 0
+
+        self.style = data["style"]
+        self.col = data["col"]
+        self.pos = data["pos"]
+
+        self.season = "spring"
+
+        self.image = plant_list[self.season][0]["texture"]["planted"][self.grow_count]
+
+        self.rect = self.image.get_rect(topleft=self.pos)
+        self.rect.y -= 7
+
+    def grow_update(self, season):
+        self.current_season = season
+
+        if self.current_season != self.season:
+            self.image = plant_list["rotten"]
+            self.rect = self.image.get_rect(topleft=self.pos)
+            self.rect.y -= 0
+
+        else:
+            if plant_list[self.season][0]["grow_stats"]-1 > self.grow_count:
+                self.grow_count += 1
+            self.image = plant_list[self.season][0]["texture"]["planted"][self.grow_count]
+            self.rect = self.image.get_rect(topleft=self.pos)
+            self.rect.y -= 7
+
+    def update(self):
+        debug(self.grow_count, 100, 100)

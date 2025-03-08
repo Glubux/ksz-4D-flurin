@@ -3,61 +3,6 @@ from random import randint, choice
 from support import *
 from settings import *
 
-class Hotbar(pygame.sprite.Sprite):
-	def __init__(self):
-		super().__init__()
-		
-		self.hotbar_slots = 5
-		self.hotbar = [["", 0] for i in range(self.hotbar_slots)]
-		self.hotbar_index = 1
-		self.hotbar_seleced = self.hotbar[self.hotbar_index+1]
-
-		self.all_items = []
-
-		
-	def input(self):
-		keys = pygame.key.get_pressed()
-
-		for num_key in range(self.hotbar_slots+1):
-			if keys[getattr(pygame, f'K_{num_key}')]:
-				self.hotbar_index = num_key
-
-		if keys[pygame.K_g]:
-			if cooldown("give_status", 0.5):
-				self.add_item(choice(get_item_list()), randint(1,10))				
-		
-		
-	def add_item(self, item, amount):
-		
-		for slot in self.hotbar:
-			if slot[0] == "":
-				slot[0] = item
-				slot[1] = amount
-				break
-			elif slot[0] == item:
-				slot[1] += amount
-				break
-
-	def update(self):
-		self.input()
-
-		self.hotbar_seleced = self.hotbar[self.hotbar_index-1]
-
-		debug(self.hotbar, 130,10)
-		debug(self.hotbar_seleced, 150,10)
-
-class Item(pygame.sprite.Sprite):
-	def __init__(self, name = "Unknow Item", description = "Unknow Item", inv_img = "./textures/item/Unknown_Item.png", stack_max = 99, group = None, range = 3, wear = -1, meta = []):
-		super().__init__()
-		self.name = name
-		self.type = description
-		self.inv_img = inv_img
-		self.stack_max = stack_max
-		self.group = group
-		self.range = range
-		self.wear = wear
-		self.meta = meta
-
 
 class Menu(pygame.sprite.Sprite):
 	def __init__(self):
@@ -72,7 +17,7 @@ class Menu(pygame.sprite.Sprite):
 
 	def load_images(self):
 		textures = {
-			"menu" : import_folder("../textures/Premium Pack v1.0/Premium Pack v1.0/1 Green Book/1 Sprites/Content/4 Buttons"),
+			"menu" : import_folder("../textures/Premium Pack v1.0/Premium Pack v1.0/2 Brown Book/1 Sprites/Content/4 Buttons"),
 		}
 		return textures
 	
@@ -108,50 +53,50 @@ class Menu(pygame.sprite.Sprite):
 			{
 				"name": "Spiel Fortsetzen",
 				"img" : [
-					[14, [pos[0] + size * 0, pos[1] + y_ofset * 0], [size, size]],
-					[15, [pos[0] + size * 1, pos[1] + y_ofset * 0], [size*3, size]],
-					[16, [pos[0] + size * 4, pos[1] + y_ofset * 0], [size, size]]
+					[18, [pos[0] + size * 0, pos[1] + y_ofset * 0], [size, size]],
+					[19, [pos[0] + size * 1, pos[1] + y_ofset * 0], [size*3, size]],
+					[20, [pos[0] + size * 4, pos[1] + y_ofset * 0], [size, size]]
 				],
 				"img_klick": [
-					[17, [pos[0] + size * 0, pos[1] + y_ofset * 0], [size, size]],
-					[18, [pos[0] + size * 1, pos[1] + y_ofset * 0], [size*3, size]],
-					[19, [pos[0] + size * 4, pos[1] + y_ofset * 0], [size, size]]
+					[18, [pos[0] + size * 0, pos[1] + y_ofset * 0], [size, size]],
+					[19, [pos[0] + size * 1, pos[1] + y_ofset * 0], [size*3, size]],
+					[20, [pos[0] + size * 4, pos[1] + y_ofset * 0], [size, size]]
 				],
 			},{
 				"name": "Einstellungen",
 				"img" : [
-					[14, [pos[0] + size * 0, pos[1] + y_ofset * 1], [size, size]],
-					[15, [pos[0] + size * 1, pos[1] + y_ofset * 1], [size*3, size]],
-					[16, [pos[0] + size * 4, pos[1] + y_ofset * 1], [size, size]]
+					[18, [pos[0] + size * 0, pos[1] + y_ofset * 1], [size, size]],
+					[19, [pos[0] + size * 1, pos[1] + y_ofset * 1], [size*3, size]],
+					[20, [pos[0] + size * 4, pos[1] + y_ofset * 1], [size, size]]
 				],
 				"img_klick": [
-					[17, [pos[0] + size * 0, pos[1] + y_ofset * 1], [size, size]],
-					[18, [pos[0] + size * 1, pos[1] + y_ofset * 1], [size*3, size]],
-					[19, [pos[0] + size * 4, pos[1] + y_ofset * 1], [size, size]]
+					[18, [pos[0] + size * 0, pos[1] + y_ofset * 1], [size, size]],
+					[19, [pos[0] + size * 1, pos[1] + y_ofset * 1], [size*3, size]],
+					[20, [pos[0] + size * 4, pos[1] + y_ofset * 1], [size, size]]
 				],
 			},{
 				"name": "Speichern & Laden",
 				"img" : [
-					[14, [pos[0] + size * 0, pos[1] + y_ofset * 2], [size, size]],
-					[15, [pos[0] + size * 1, pos[1] + y_ofset * 2], [size*3, size]],
-					[16, [pos[0] + size * 4, pos[1] + y_ofset * 2], [size, size]]
+					[18, [pos[0] + size * 0, pos[1] + y_ofset * 2], [size, size]],
+					[19, [pos[0] + size * 1, pos[1] + y_ofset * 2], [size*3, size]],
+					[20, [pos[0] + size * 4, pos[1] + y_ofset * 2], [size, size]]
 				],
 				"img_klick": [
-					[17, [pos[0] + size * 0, pos[1] + y_ofset * 2], [size, size]],
-					[18, [pos[0] + size * 1, pos[1] + y_ofset * 2], [size*3, size]],
-					[19, [pos[0] + size * 4, pos[1] + y_ofset * 2], [size, size]]
+					[18, [pos[0] + size * 0, pos[1] + y_ofset * 2], [size, size]],
+					[19, [pos[0] + size * 1, pos[1] + y_ofset * 2], [size*3, size]],
+					[20, [pos[0] + size * 4, pos[1] + y_ofset * 2], [size, size]]
 				],
 			},{
 				"name": "Spiel Beenden",
 				"img" : [
-					[14, [pos[0] + size * 0, pos[1] + y_ofset * 3], [size, size]],
-					[15, [pos[0] + size * 1, pos[1] + y_ofset * 3], [size*3, size]],
-					[16, [pos[0] + size * 4, pos[1] + y_ofset * 3], [size, size]]
+					[18, [pos[0] + size * 0, pos[1] + y_ofset * 3], [size, size]],
+					[19, [pos[0] + size * 1, pos[1] + y_ofset * 3], [size*3, size]],
+					[20, [pos[0] + size * 4, pos[1] + y_ofset * 3], [size, size]]
 				],
 				"img_klick": [
-					[17, [pos[0] + size * 0, pos[1] + y_ofset * 3], [size, size]],
-					[18, [pos[0] + size * 1, pos[1] + y_ofset * 3], [size*3, size]],
-					[19, [pos[0] + size * 4, pos[1] + y_ofset * 3], [size, size]]
+					[18, [pos[0] + size * 0, pos[1] + y_ofset * 3], [size, size]],
+					[19, [pos[0] + size * 1, pos[1] + y_ofset * 3], [size*3, size]],
+					[20, [pos[0] + size * 4, pos[1] + y_ofset * 3], [size, size]]
 				],
 			}
 		]
@@ -164,10 +109,10 @@ class Menu(pygame.sprite.Sprite):
 				self.screen.blit(img, element["img"][n][1])
 
 			numb = self.font.render(str(i + 1), True, "black")
-			self.screen.blit(numb, (element["img"][0][1][0] + 25, element["img"][0][1][1] + 50))
+			self.screen.blit(numb, (element["img"][0][1][0] + 25, element["img"][0][1][1] + 65))
 
 			text = self.font.render(element["name"], True, "black")
-			self.screen.blit(text, (element["img"][0][1][0] + 100 , element["img"][0][1][1] + 50))
+			self.screen.blit(text, (element["img"][0][1][0] + 100 , element["img"][0][1][1] + 65))
 
 		if cooldown("menu_frame", 0.15):
 			self.draw_frame += 1
@@ -179,6 +124,7 @@ class Menu(pygame.sprite.Sprite):
 		ans = self.input()
 		return ans
 	
+
 class Inventar(pygame.sprite.Sprite):
 	def __init__(self):
 		super().__init__()
@@ -197,10 +143,19 @@ class Inventar(pygame.sprite.Sprite):
 		self.inv_pos = (-70, -330)
 		self.inv_scale = 2.3
 
+
+		# Hotbar
+		self.hotbar_slots = 9
+		self.hotbar = [["", 0] for i in range(self.hotbar_slots)]
+		self.hotbar_index = 1
+		self.hotbar_seleced = self.hotbar[self.hotbar_index+1]
+
+		self.all_items = []
+
+
 	def open_inv(self):
 		self.status = "open"
 		self.draw_open()
-
 
 	def close_inv(self):
 		self.status = "close"
@@ -217,7 +172,10 @@ class Inventar(pygame.sprite.Sprite):
 		textures = {
 			"inv_open" : import_folder("../textures/Premium Pack v1.0/Premium Pack v1.0/1 Green Book/1 Sprites/Inventory Book/Book Open and Close/Style 2/Open"),
 			"inv_close" : import_folder("../textures/Premium Pack v1.0/Premium Pack v1.0/1 Green Book/1 Sprites/Inventory Book/Book Open and Close/Style 2/Close"),
-			"inv_book" : import_image("../textures/Premium Pack v1.0/Premium Pack v1.0/1 Green Book/1 Sprites/Inventory Book/Book Idle/1.png")
+			"inv_book" : import_image("../textures/Premium Pack v1.0/Premium Pack v1.0/1 Green Book/1 Sprites/Inventory Book/Book Idle/1.png"),
+			"hotbar_paper": import_image("../textures/Premium Pack v1.0/Premium Pack v1.0/1 Green Book/1 Sprites/Paper UI Pack/Paper UI/Plain/3 Item Holder/1.png"),
+			"hotbar_slot": import_image("../textures/Premium Pack v1.0/Premium Pack v1.0/1 Green Book/1 Sprites/Content/5 Holders/6.png"),
+			"hotbar_slot_highlight": import_image("../textures/Premium Pack v1.0/Premium Pack v1.0/1 Green Book/1 Sprites/Content/6 High lighter/5.png"),
 		}
 		return textures
 
@@ -247,32 +205,91 @@ class Inventar(pygame.sprite.Sprite):
 				self.inv_close_frame = 0
 				return "close_finish"
 			
-	def draw(self):
-		size = self.textures["inv_book"].get_size()
-		img = pygame.transform.scale(self.textures["inv_book"], (int(size[0] * self.inv_scale), int(size[1] * self.inv_scale)))
-		self.screen.blit(img, self.inv_pos)
+	def draw(self, kind):
+		if kind == "inv":
+			size = self.textures["inv_book"].get_size()
+			img = pygame.transform.scale(self.textures["inv_book"], (int(size[0] * self.inv_scale), int(size[1] * self.inv_scale)))
+			self.screen.blit(img, self.inv_pos)
+
+
+		if kind == "hotbar":
+			hotbar_paper_scale = 1
+			hotbar_slot_scale = 1
+			pos = [460 , 900]
+
+			self.textures["hotbar_paper"] = pygame.transform.scale(self.textures["hotbar_paper"], (int(self.textures["hotbar_paper"].get_width() * hotbar_paper_scale), int(self.textures["hotbar_paper"].get_height() * hotbar_paper_scale)))
+			self.textures["hotbar_slot"] = pygame.transform.scale(self.textures["hotbar_slot"], (self.textures["hotbar_slot"].get_width() * hotbar_slot_scale, self.textures["hotbar_slot"].get_height() * hotbar_slot_scale))
+
+			self.screen.blit(self.textures["hotbar_paper"], pos)
+			for i in range(9):
+				self.screen.blit(self.textures["hotbar_slot"], (pos[0] + 80 + i * 95, pos[1] + 60))
+			self.screen.blit(self.textures["hotbar_slot_highlight"], (pos[0] + 80 + (self.hotbar_index-1) * 95, pos[1] + 60))
+
+
+	def key_handler(self):
+		keys = pygame.key.get_pressed()
+
+		for num_key in range(1, self.hotbar_slots + 1):
+			if keys[getattr(pygame, f'K_{num_key}')]:
+				self.hotbar_index = num_key
+
+
+		if keys[pygame.K_g]:
+			if cooldown("give_status", 0.5):
+				self.add_item(choice(get_item_list()), randint(1,10))
+
+	def add_item(self, item, amount):
+		
+		for slot in self.hotbar:
+			if slot[0] == "":
+				slot[0] = item
+				slot[1] = amount
+				break
+			elif slot[0] == item:
+				slot[1] += amount
+				break
 			
 
-	def update(self):
-		if self.status == "open":
-			self.draw_open_ans = self.draw_open()
-			if self.draw_open_ans == "open_finish":
-				self.status = "working"
+	def update(self, kind):
+		self.key_handler()
 
-		elif self.status == "close":
-			self.draw_close_ans = self.draw_close()
-			if self.draw_close_ans == "close_finish":
-				self.status = "closed"
+		if kind == "inv":
+			if self.status == "open":
+				self.draw_open_ans = self.draw_open()
+				if self.draw_open_ans == "open_finish":
+					self.status = "working"
 
-		elif self.status == "working":
-			self.input_ans = self.input()
-			self.draw()
+			elif self.status == "close":
+				self.draw_close_ans = self.draw_close()
+				if self.draw_close_ans == "close_finish":
+					self.status = "closed"
 
-		return {"input_ans": self.input_ans, "status": self.status}
+			elif self.status == "working":
+				self.input_ans = self.input()
+				self.draw(kind)
 
-class Inventory_Image(pygame.sprite.Sprite):
-	def __init__(self, pos, groups, type = "visible", surface = pygame.Surface((TILESIZE,TILESIZE))):
-		super().__init__()
+			return {"input_ans": self.input_ans, "status": self.status}
 
-		self.image = None
-		self.rect = self.image.get_rect()
+			
+		elif kind == "hotbar" or False:
+			self.draw(kind)
+
+			self.hotbar_seleced = self.hotbar[self.hotbar_index-1]
+			debug(self.hotbar, 130,10)
+			debug(self.hotbar_seleced, 150,10)
+
+			return {}
+
+
+class Item(pygame.sprite.Sprite):
+	def __init__(self, name, description, path, stack_max, group = None, range = 3, wear = -1, meta = []):
+		super().__init__(group)
+		self.name = name
+		self.type = description
+		self.inv_img = import_image(path)
+		self.stack_max = stack_max
+		self.group = group
+		self.range = range
+		self.wear = wear
+		self.meta = meta
+

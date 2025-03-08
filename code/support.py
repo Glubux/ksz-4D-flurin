@@ -1,5 +1,6 @@
 from csv import reader
 from os import walk
+import re
 import pygame
 
 pygame.init()
@@ -13,15 +14,22 @@ def import_csv_layout(path):
 			terrain_map.append(list(row))
 		return terrain_map
 
-def import_folder(path):
-	surface_list = []
+def numeric_sort_key(filename):
+    # für alphabetische und numerische sortierung
+    return [int(text) if text.isdigit() else text.lower() for text in re.split('([0-9]+)', filename)]
 
-	for _,__,img_files in walk(path):
-		for image in img_files:
-			full_path = path + '/' + image
-			image_surf = pygame.image.load(full_path).convert_alpha()
-			surface_list.append(image_surf)
-	return surface_list
+def import_folder(path):
+    surface_list = []
+
+    for _, _, img_files in walk(path):
+        img_files.sort(key=numeric_sort_key)
+
+        for image in img_files:
+            full_path = path + '/' + image
+            image_surf = pygame.image.load(full_path).convert_alpha()
+            surface_list.append(image_surf)
+    
+    return surface_list
 
 def import_image(path):
 	if type(path) == list:
@@ -68,6 +76,17 @@ def import_tileset(anymation_type, path, amount_frames, size=(32,32), scale_fakt
 				sub_surfaces.append(sub_surface)
 
 		return sub_surfaces
+	
+	if anymation_type == "plants":
+		# meta -> position des ersten Tiles
+		surfaces = []
+
+		for x in range(amount_frames):
+			surface = img.subsurface((meta[0] + x)*size[0], ((meta[1]*2 + 1)) * size[1], size[0], size[1])
+			surface = pygame.transform.scale(surface, (size[0]*scale_faktor, size[1]*scale_faktor))
+			surfaces.append(surface)
+
+		return surfaces
 	
 		
 
