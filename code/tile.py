@@ -42,14 +42,17 @@ class Plants(pygame.sprite.Sprite):
         self.pos = data["pos"]
 
         self.season = "spring"
+        self.season_set = False
 
-        self.image = plant_list[self.season][0]["texture"]["planted"][self.grow_count]
+        self.rand_type = randint(0, len(plant_list[self.season])-1)
+
+        self.image = plant_list[self.season][self.rand_type]["texture"]["planted"][self.grow_count]
 
         self.rect = self.image.get_rect(topleft=self.pos)
-        self.rect.y -= 7
+        self.rect.y -= 25
 
     def grow_update(self, season):
-        self.current_season = season
+        self.current_season = season      
 
         if self.current_season != self.season:
             self.image = plant_list["rotten"]
@@ -57,11 +60,11 @@ class Plants(pygame.sprite.Sprite):
             self.rect.y -= 0
 
         else:
-            if plant_list[self.season][0]["grow_stats"]-1 > self.grow_count:
+            if plant_list[self.season][self.rand_type]["grow_stats"]-1 > self.grow_count:
                 self.grow_count += 1
-            self.image = plant_list[self.season][0]["texture"]["planted"][self.grow_count]
+            self.image = plant_list[self.season][self.rand_type]["texture"]["planted"][self.grow_count]
             self.rect = self.image.get_rect(topleft=self.pos)
-            self.rect.y -= 7
+            self.rect.y -= 25
 
     def update(self):
-        debug(self.grow_count, 100, 100)
+        pass

@@ -44,10 +44,10 @@ npcs = {
 		"img": ["../textures/skins/schrödinger/schrödinger.png"],
 		"talk": {
 			"idl": [
-				{"text": "Schönes Wetter heute, nicht wahr?", "time": 2, "root": 0},
-				{"text": "Wo ist meine Katze? Lebt sie noch?", "time": 2, "root": 0},
-				{"text": "Schröööödinger, Schröööödiiinger!", "time": 2, "root": 0},
-				{"text": "Hallo Mein Name ist Schrödinger. Ich bin ein Mensch. Oder Nicht? Bitte hilf mir, ich bin in gefahrt.", "time": 2, "root": 0},
+				{"text": "Guten Tag fremder Wanderer.", "time": 2, "root": 0},
+				{"text": "Wohin des Weges Fremder? Hast du die Insel schon besucht?", "time": 2, "root": 0},
+				{"text": "Das wandern ist des Müllers Lust, das wandern ist das Müllers Lust- Lalala la la...", "time": 2, "root": 0},
+				{"text": "Mein Name ist Josh. Jeden Tag schaue ich bei meinen Feldern vorbei und giesse sie. Hast du gewusst, das im Sommer alle Pflanzen welken?", "time": 2, "root": 0},
 			],
 			"begrüssung": [
 				{"text": "Hallo mein Name ist Schrödinger.", "time": 1, "root": 0},

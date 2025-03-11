@@ -6,6 +6,7 @@ from debug import *
 from support import *
 from inventar import *
 from npc import *
+from audio import *
 
 class Level:
 	def __init__(self):
@@ -16,6 +17,7 @@ class Level:
 		self.dialog = Dialog()
 		self.time = Time()
 		self.fade = FadeEffect()
+		self.sound_manager = SoundManager()
 
 		self.ingametime = self.time.update()
 
@@ -31,26 +33,42 @@ class Level:
 		self.plants = pygame.sprite.Group()
 
 
-		self.inv_status = False
-		self.menu_status = False
+		self.inv_status = "closed"
+		self.menu_status = "closed"
 		self.dialog_status = False
 
-		self.menu_data = None
-		self.inv_data = None
-
 		self.inv_update_ans = None
+		self.menu_update_ans = None
 		self.dialog_ans = None
 
-		self.map(self.season)
+		# sounds
+		self.sound_manager.load_sfx("faucet", "/mornign_faucet.mp3")
+		self.sound_manager.load_sfx("ernte", "ernte.mp3")
+		self.sound_manager.load_sfx("attack", "attack.mp3")
 
-		
+
+		self.music_list = [
+			"whispers_in_the_rain.mp3",
+			"the_old_windmill.mp3",
+			"echoes_in_the_glen.mp3",
+			"after work.mp3",
+			"autumn vibes.mp3",
+			"dance of the trees.mp3",
+			"hot springs.mp3",
+			"life of sense.mp3",
+			"like the wind.mp3",
+			"the lighthouse.mp3",
+			"the watermill.mp3",
+		]
+		self.season_changed = False
+		self.map(self.season)
 
 	def map(self, season):
 		self.season_setting = {
-			"winter": ["winter_deco", "boundary"],
-			"spring": ["spring_deco", "water_spring_summer", "boundary", "plants"],
-			"summer": ["summer_deco", "water_spring_summer", "boundary", "plants"],
-			"autom": ["autom_deco", "water_autom", "boundary", "plants"],
+			"winter": ["winter_deco", "boundary", "npc"],
+			"spring": ["spring_deco", "water_spring_summer", "boundary", "plants", "npc"],
+			"summer": ["summer_deco", "water_spring_summer", "boundary", "plants", "npc"],
+			"autom": ["autom_deco", "water_autom", "boundary", "plants", "npc"],
 		}
 		self.csv_data = {
 			"boundary": [import_csv_layout("../textures/map/map_obstacle_main.csv"), "None"],
@@ -62,7 +80,7 @@ class Level:
 			"summer_deco": [import_csv_layout("../textures/map/map_Summer_decoration.csv"), "summer"],
 			"autom_deco": [import_csv_layout("../textures/map/map_Autom_decoration.csv"), "autom"],
 			"winter_deco": [import_csv_layout("../textures/map/map_Winter_decoration.csv"), "winter"],
-
+			"npc": [import_csv_layout("../textures/map/map_npc.csv"), None]
 		}
 		self.textures = {
 			"winter": import_tileset("tileset", "../textures/farm/Tileset/Tileset Winter.png", [15,14], (16,16), 4),
@@ -70,7 +88,9 @@ class Level:
 			"spring": import_tileset("tileset", "../textures/farm/Tileset/Tileset Grass Spring.png", [25,27], (16,16), 4),
 			"autom": import_tileset("tileset", "../textures/farm/Tileset/Tileset Grass Fall.png", [25,22], (16,16), 4),
 			"boundary": import_tileset("tileset", "../textures/tiled/color_tiledset.png", [4,4], (16,16), 4),
-			"plants": import_tileset("tileset", "../textures/tiled/color_tiledset.png", [4,4], (16,16), 4),
+			#"plants": import_tileset("tileset", "../textures/tiled/color_tiledset.png", [4,4], (16,16), 4),
+			"plants": import_image("../textures/farm/farmland.png"),
+			"npc": import_tileset("character", "../textures/character and portrait/Character/Pre-made/Josh/Idle.png", [4,4]),
 		}
 		
 		for style in self.season_setting[season]: # needed self.csv_data
@@ -85,9 +105,9 @@ class Level:
 					if col != -1:
 						if style == "boundary":
 							if col == 0: # wasser
-								Tile((x,y),[self.visible_sprites, self.water_group], [style, "background", col] ,self.textures["boundary"][col])
+								Tile((x,y),[self.water_group], [style, "background", col] ,self.textures["boundary"][col])
 							elif col == 12: # border
-								Tile((x,y),[self.obstacle_sprites, self.visible_sprites], [style, "background", col] ,self.textures["boundary"][col])
+								Tile((x,y),[self.obstacle_sprites], [style, "background", col] ,self.textures["boundary"][col])
 						
 						elif style == "water_spring_summer":
 							Tile((x,y),[self.visible_sprites], [style, "background"] ,self.textures["spring"][col])
@@ -95,19 +115,20 @@ class Level:
 							Tile((x,y),[self.visible_sprites], [style, "background"] ,self.textures["autom"][col])
 
 						elif style == "plants":
-							
+							Tile((x,y),[self.visible_sprites], [style, "background"], self.textures["plants"])
 							Plants((x,y),[self.visible_sprites, self.plants], {"style": style, "col": col, "pos": (x,y)})
-							Tile((x,y),[self.visible_sprites], [style, "background"], self.textures["boundary"][col])
+
+						elif style == "npc":
+							npc = Npc((x, y), [self.visible_sprites, self.npcs], self.obstacle_sprites, "schrödinger", self.dialog, self.textures["npc"])
+							self.npcs.add(npc)
 							
 						else:
 							Tile((x,y),[self.visible_sprites], [style, "backgorund"], self.textures[self.season][col])
 
-						if style == "npc":
-							npc = Npc((x, y), [self.visible_sprites, self.npcs], self.obstacle_sprites, "schrödinger", self.dialog)
-							self.npcs.add(npc)
-							pass
-
-		self.player = Player((1000,500),[self.visible_sprites],self.obstacle_sprites,"Alex")
+		if self.season_changed:
+			self.player = Player((self.player.rect.x,self.player.rect.y),[self.visible_sprites],self.obstacle_sprites,"Alex")
+		else:
+			self.player = Player((1500,500),[self.visible_sprites],self.obstacle_sprites,"Alex")
 
 
 	def input(self):
@@ -115,44 +136,45 @@ class Level:
 
 		if keys[pygame.K_e]:
 			if cooldown("open_inv", 0.5):
-				if not self.inv_status:
-					if self.menu_status:
-						pass
-					else:
-						self.inv_status = True
-						self.inv.open_inv()
-						self.fade.set_fade(50, 0.5)
-
-				else:
-					self.inv.close_inv()
-					self.fade.set_fade(0, 0.7)
-
+				if self.inv_status == "closed" and self.menu_status == "closed":
+					self.inv_status = "open"
 
 		if keys[pygame.K_ESCAPE]:
 			if cooldown("open_menu", 0.5):
-				if not self.menu_status:
-					if self.inv_status:
-						self.inv.close_inv()
-						self.fade.set_fade(0, 0.7)
+				if self.menu_status == "closed" and self.inv_status == "closed":
+					self.menu_status = "open"
+					#self.fade.set_fade(50, 0.5)
 
-					else:
-						self.menu_status = True
-						self.menu.open_menu()
-						self.fade.set_fade(50, 0.5)
-				
+					#self.fade.set_fade(0, 1, True)
+
+		elif keys[pygame.K_f]:
+			if cooldown("ernte", 0.3):
+				colided = pygame.sprite.spritecollide(self.player, self.plants, True, pygame.sprite.collide_mask)
+				if colided:
+					self.sound_manager.play_sfx("ernte")
 				else:
-					self.menu_status = False
-					self.menu.close_menu()
-					self.fade.set_fade(0, 1, True)
+					self.sound_manager.play_sfx("attack")
+
 
 		if keys[pygame.K_c]:
 			x = self.player.rect.centerx
 			y = self.player.rect.centery
 			Tile((x,y),[self.visible_sprites], ["style", "background"], self.textures["boundary"][0])
 
+		if keys[pygame.K_m]:
+			self.sound_manager.stop_music()
+		
+		if keys[pygame.K_LALT]:
+			self.sound_manager.set_music_volume(0.05)
+		if keys[pygame.K_RALT]:
+			self.sound_manager.set_music_volume(0.2)
+
 
 		
 	def run(self):
+		if self.season_changed == False:
+			self.season_changed = True
+
 		# update and draw the game
 		self.visible_sprites.custom_draw(self.player)
 		self.input()
@@ -169,33 +191,48 @@ class Level:
 			for plant in self.plants:
 				plant.grow_update(self.season)
 
+		if self.ingametime["hour"] == 6 and self.ingametime["minute"] == 6:
+			self.sound_manager.set_sfx_volume(0.1)
+			self.sound_manager.play_sfx("faucet")
+
 		self.fade.update()
 
 		self.dialog_ans = self.dialog.update()
 
-		if self.menu_status:
-			self.menu_data = self.menu.update()
+		self.play_music()
+		#self.sound_manager.stop_music()
 
-			if self.menu_data == "1":
-				self.menu.close_menu()
+		if self.menu_status in ["open", "opened"]:
+			self.menu_update_ans = self.menu.update(self.menu_status)
+
+			if self.menu_update_ans["input_ans"] == "1":
+				self.menu.status = "close"
 				self.menu_status = False
-			if self.menu_data == "2":
+			if self.menu_update_ans["input_ans"] == "2":
 				print("Einstellungen")
-			if self.menu_data == "3":
+			if self.menu_update_ans["input_ans"] == "3":
 				print("Speichern & Laden")
-			if self.menu_data == "4":
+			if self.menu_update_ans["input_ans"] == "4":
 				pygame.quit()
 				sys.exit()
+
+			if self.menu_update_ans["status"] == "closed":
+				self.menu_status = "closed"
+			elif self.menu_update_ans["status"] == "idl":
+				self.menu_status = "opened"
 			
-		elif self.inv_status:
-			self.inv_update_ans = self.inv.update("inv")
-			print(self.inv_update_ans)
+			
+		elif self.inv_status in ["open", "opened"]:
+			self.inv_update_ans = self.inv.update("inv", self.inv_status, self.season, self.player.rect)
+		
 			if self.inv_update_ans["status"] == "closed":
-				self.inv_status = False
-				self.inv.status = ""
+				self.inv_status = "closed"
+				self.inv.status = None
+			elif self.inv_update_ans["status"] == "idl":
+				self.inv_status = "opened"
 		
 		else:
-			self.inv_update_ans = self.inv.update("hotbar")
+			self.inv_update_ans = self.inv.update("hotbar", "", "", "")
 			self.time.draw()
 
 			self.visible_sprites.update()
@@ -207,8 +244,14 @@ class Level:
 			#print("water")
 			pass
 
+
+		
 	def colide(self):
 		return pygame.sprite.spritecollideany(self.player, self.water_group, pygame.sprite.collide_rect)
+	
+	def play_music(self):
+		if not self.sound_manager.is_music_playing():
+			self.sound_manager.play_music(self.music_list[randint(0, len(self.music_list)-1)],1)
 
 class YSortCameraGroup(pygame.sprite.Group):
 	def __init__(self, season):
@@ -296,9 +339,9 @@ class Time():
 		self.time = {
 			"year": 1,
 			"season": "spring",
-			"day": 28,
-			"hour": 12,
-			"minute": 0,
+			"day": 1,
+			"hour": 5,
+			"minute": 45,
 			"weekday": self.weekdays[0]
 		}
 		self.images = self.load_images()
@@ -310,7 +353,6 @@ class Time():
 		self.day_night_cycle = DayNightCycle()
 
 	def calculate_time(self):
-		debug(self.gameminute_in_seconds * self.time_sprint, 700, 100)
 		if cooldown("gameminute", self.gameminute_in_seconds * self.time_sprint):
 			self.time["minute"] += 1
 			if self.time["minute"] >= 60:
@@ -329,10 +371,7 @@ class Time():
 	def key_handler(self):
 		keys = pygame.key.get_pressed()
 
-		if keys[pygame.K_i]:
-			if cooldown("time_speed_input", 0.2):
-				self.time_sprint += 0.2
-		elif keys[pygame.K_o]:
+		if keys[pygame.K_o]:
 			if cooldown("time_speed_input", 0.2):
 				self.time_sprint -= 0.2
 
@@ -384,7 +423,7 @@ class Time():
 
 
 		time_text_1 = self.font.render(f"{self.time["weekday"]} | {self.time["day"]}", True, "black")
-		time_text_2 = self.font.render(f"{self.time["hour"]}:{self.time["minute"]} ", True, "black")
+		time_text_2 = self.font.render(f"{self.time["hour"]}:{self.time["minute"]-self.time["minute"]%5} ", True, "black")
 		
 		self.screen.blit(self.images["time_background"], pos)
 		self.screen.blit(image_list[self.images_count], [pos[0] + 280, pos[1] + 70])
@@ -397,7 +436,5 @@ class Time():
 		self.day_night_cycle.draw()
 		self.calculate_time()
 		self.key_handler()
-
-		debug(f"{self.time["season"]} {self.time["day"]}. {self.time["hour"]}:{self.time["minute"]}", 200, 10)
 
 		return self.time

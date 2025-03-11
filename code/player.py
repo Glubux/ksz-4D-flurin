@@ -2,6 +2,7 @@ import pygame
 from settings import *
 from debug import *
 from support import *
+from audio import *
 
 class Player(pygame.sprite.Sprite):
 	def __init__(self,pos,groups,obstacle_sprites,skin_name):
@@ -11,6 +12,7 @@ class Player(pygame.sprite.Sprite):
 		self.rect = self.image.get_rect(topleft = pos)
 		self.hitbox = self.rect.inflate(-70,-50)
 
+		self.sound_manager = SoundManager()
 		self.acceleration = pygame.math.Vector2()
 		self.direction = pygame.math.Vector2()
 		self.player_direction = "down"
@@ -27,6 +29,14 @@ class Player(pygame.sprite.Sprite):
 
 		self.is_attacking = False 
 		self.attacking_frame = 0
+		self.attacking_radius = 5 * TILESIZE
+
+		# sounds
+		self.sound_manager.load_sfx("walk", "walk.mp3")
+		self.sound_manager.load_sfx("run", "run.mp3")
+
+		self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+
 
 
 	def load_textures(self):
@@ -53,6 +63,7 @@ class Player(pygame.sprite.Sprite):
 	
 	def input(self):
 		keys = pygame.key.get_pressed()
+		mouse_x, mouse_y = pygame.mouse.get_pos()
 		max_acceleration = self.speed*5
 
 		if self.direction == [0,0]:
@@ -116,9 +127,17 @@ class Player(pygame.sprite.Sprite):
 		
 		if keys[pygame.K_f] or self.is_attacking:
 			self.is_attacking = True
-			self.player_action = "shovel"
+			self.player_action = "sword"
 
-		
+		if keys[pygame.K_g]:
+			dx = mouse_x - self.rect.x
+			dy = mouse_y - self.rect.y
+			distance = (dx**2 + dy**2) ** 0.5
+
+			if distance <= self.attacking_radius:
+				debug("Selected", 600, 20)
+			
+
 	def move(self,speed):
 		if self.direction.magnitude() != 0:
 			self.direction = self.direction.normalize()
@@ -171,3 +190,24 @@ class Player(pygame.sprite.Sprite):
 		self.input()
 		self.draw()
 		self.move(self.speed)
+
+		if self.player_action == "walk":
+			if cooldown("sound_walk", 0.4):
+				self.sound_manager.set_sfx_volume(0.3)
+				self.sound_manager.play_sfx(self.player_action)
+		if self.player_action == "run":
+			if cooldown("sound_run", 0.3):
+				self.sound_manager.set_sfx_volume(0.3)
+				self.sound_manager.play_sfx(self.player_action)
+
+
+		mouse_x, mouse_y = pygame.mouse.get_pos()
+		dx = mouse_x - self.rect.x
+		dy = mouse_y - self.rect.y
+		distance = (dx**2 + dy**2) ** 0.5
+
+		if distance <= self.attacking_radius:
+			grid_x = (mouse_x // TILESIZE) * TILESIZE
+			grid_y = (mouse_y // TILESIZE) * TILESIZE
+			pygame.draw.rect(self.screen, (255,0,0), (grid_x, grid_y, TILESIZE, TILESIZE), 3)
+

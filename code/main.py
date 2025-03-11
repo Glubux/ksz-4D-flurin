@@ -28,7 +28,7 @@ class Game:
 
 			self.screen.fill('black')
 			self.level.run()
-			debug(round(self.clock.get_fps()), 600, 10)
+			debug(round(self.clock.get_fps()), 10, 10)
 
 			pygame.display.update()
 			self.clock.tick(FPS)

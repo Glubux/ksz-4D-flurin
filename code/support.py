@@ -169,3 +169,9 @@ class FadeEffect:
 
 		self.screen.blit(self.surface, (0, 0))
 		return not self.is_fading
+
+
+def get_minimap_position(player_x, player_y, map_width=5000, map_height=5000, mini_width=500, mini_height=500):
+    mini_x = round((player_x / map_width) * mini_width)
+    mini_y = round((player_y / map_height) * mini_height)
+    return mini_x, mini_y

@@ -36,7 +36,7 @@ class Dialog(pygame.sprite.Sprite):
 				self.status = False
 
 	def draw(self, dialog_words, dialog_count):
-		pos = (120, HEIGHT - 300)
+		pos = (300, HEIGHT - 550)
 		scale = 1.5
 		max_width = 656 * 2 - 40
 		line_height = 30 * scale
